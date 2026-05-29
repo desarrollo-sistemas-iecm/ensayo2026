@@ -1,0 +1,983 @@
+/* =========================================================
+   inicio.css — Estilos de la página de inicio (inicio.php)
+   Paleta literaria: Azules oscuros y dorado/cobre
+   ========================================================= */
+
+/* ========== RESETS AGRESIVOS PARA ELIMINAR ESPACIO MUERTO ========== */
+html {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+body {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: linear-gradient(135deg, #1a0d2e 0%, #2d1b4e 50%, #1f1035 100%) !important;
+    min-height: 100vh;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+#pageWrapper {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    min-height: auto !important;
+    position: relative !important;
+}
+
+.hero-combined {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+}
+
+.hero-combined__center {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+}
+
+/* ========================================================================= */
+
+/* Reset y base */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* =============================================
+   Hero combinado: header + hero fusionados
+   ============================================= */
+.hero-combined {
+    min-height: auto;
+    background: linear-gradient(135deg, #1a0d2e 0%, #2d1b4e 50%, #1f1035 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    position: relative;
+    padding: 80px 20px 20px;
+    text-align: center;
+    overflow: hidden;
+}
+
+/* Canvas del rastro del mouse — cubre toda la sección sin bloquear clics */
+#trailCanvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Desactivar canvas en móviles para mejor rendimiento */
+@media (max-width: 768px) {
+    #trailCanvas {
+        display: none;
+    }
+}
+
+/* El contenido debe quedar por encima del canvas */
+.hero-combined__logo,
+.hero-combined__center {
+    position: relative;
+    z-index: 2;
+}
+
+/* Logo flotando arriba a la izquierda */
+.hero-combined__logo {
+    position: absolute;
+    top: 20px;
+    left: 24px;
+}
+
+.hero-combined__logo img {
+    max-height: 180px;
+    width: auto;
+    filter: brightness(0) invert(1);
+    opacity: .95;
+    transition: opacity .3s;
+}
+
+.hero-combined__logo img:hover {
+    opacity: 1;
+}
+
+/* Contenedor del texto central */
+.hero-combined__center {
+    max-width: 860px;
+    width: 100%;
+}
+
+/* Título principal gigante con tipografía elegante */
+.hero-combined__title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(4.5rem, 13vw, 10rem);
+    font-weight: 900;
+    color: #fff;
+    line-height: 1;
+    margin: 0 0 32px;
+    text-shadow: 0 6px 40px rgba(0, 0, 0, .45);
+    letter-spacing: .05em;
+    text-transform: uppercase;
+}
+
+/* Título principal fuera del card */
+.hero-combined__main-title-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    margin: 2rem 0 3rem;
+    padding: 0 16px;
+}
+
+.hero-combined__main-title {
+    margin: 0;
+    font-family: 'Montserrat', sans-serif;
+    font-size: clamp(2.45rem, 3.4vw, 3.65rem);
+    font-weight: 800;
+    color: #ffffff;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    text-shadow: 0 8px 32px rgba(0, 0, 0, .45);
+    line-height: 1.1;
+}
+
+.hero-combined__main-title-divider {
+    width: 56px;
+    height: 3px;
+    margin: 4px auto;
+    border-radius: 2px;
+    background-color: #4A9FD5;
+}
+
+.hero-combined__main-subtitle {
+    margin: 0;
+    font-family: 'Montserrat', sans-serif;
+    font-size: clamp(1.28rem, 2.25vw, 1.72rem);
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.75);
+    font-style: italic;
+    text-shadow: 0 8px 32px rgba(0, 0, 0, .45);
+}
+
+/* Subtítulo y descripción */
+.hero-combined__subtitle {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.25rem;
+    color: rgba(255, 255, 255, .95);
+    line-height: 1.75;
+    margin: 0 auto 40px;
+    max-width: 680px;
+    font-weight: 400;
+}
+
+.hero-combined__subtitle em {
+    font-style: italic;
+    font-weight: 700;
+    color: #4A9FD5;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, .35);
+}
+
+.hero-combined__subtitle span {
+    font-size: 1.05rem;
+    opacity: .88;
+    display: block;
+    margin-top: 12px;
+    font-weight: 300;
+}
+
+/* Botones de acción */
+.hero-combined__actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 16px;
+}
+
+/* Botón principal sólido */
+.btn-inicio {
+    background-color: #4A9FD5;
+    color: #fff;
+    border: 2px solid #4A9FD5;
+    font-weight: 700;
+    font-size: 1.1rem;
+    padding: 14px 40px;
+    border-radius: 50px;
+    margin: 8px;
+    transition: all .3s ease;
+    display: inline-block;
+    font-family: 'Montserrat', sans-serif;
+    text-decoration: none;
+    box-shadow: 0 4px 20px rgba(74, 159, 213, .3);
+}
+
+.btn-inicio:hover {
+    background-color: #2E86AB;
+    color: #fff;
+    border-color: #2E86AB;
+    text-decoration: none;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 28px rgba(74, 159, 213, .5);
+}
+
+/* Botón outline (borde) */
+.btn-inicio-outline {
+    background-color: transparent;
+    color: #fff;
+    border: 2px solid rgba(255, 255, 255, .9);
+    font-weight: 700;
+    font-size: 1.1rem;
+    padding: 14px 40px;
+    border-radius: 50px;
+    margin: 8px;
+    transition: all .3s ease;
+    display: inline-block;
+    font-family: 'Montserrat', sans-serif;
+    text-decoration: none;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, .15);
+}
+
+.btn-inicio-outline:hover {
+    background-color: rgba(255, 255, 255, .15);
+    color: #fff;
+    border-color: #fff;
+    text-decoration: none;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 28px rgba(0, 0, 0, .25);
+}
+
+/* ---------- Fondo: estudio nocturno con puntos de luz ---------- */
+#pageWrapper {
+    background: #1a0d2e !important;
+    background-image:
+        radial-gradient(circle at 10% 18%, rgba(107,33,168,0.35) 0%, rgba(107,33,168,0.08) 22%, rgba(107,33,168,0) 55%),
+        radial-gradient(circle at 82% 34%, rgba(147,51,234,0.25) 0%, rgba(147,51,234,0.06) 20%, rgba(147,51,234,0) 50%),
+        radial-gradient(circle at 50% 78%, rgba(13,148,136,0.22) 0%, rgba(13,148,136,0.04) 18%, rgba(13,148,136,0) 45%);
+    background-blend-mode: screen, screen, screen;
+}
+
+/* Textura de ruido muy fina */
+#pageWrapper::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.04;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence baseFrequency='0.9' numOctaves='1' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)' fill='%23ffffff' opacity='0.08'/></svg>");
+    background-repeat: repeat;
+    mix-blend-mode: overlay;
+}
+
+/* Líneas diagonales sutiles (2-3 trazos) */
+#pageWrapper::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    background-image:
+        linear-gradient(135deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.04) 0.15%, transparent 0.2%),
+        linear-gradient(140deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.03) 0.12%, transparent 0.18%),
+        linear-gradient(120deg, rgba(255,255,255,0.025) 0%, rgba(255,255,255,0.025) 0.10%, transparent 0.16%);
+    background-repeat: no-repeat;
+    background-position: 8% 12%, 78% 36%, 48% 82%;
+    background-size: 60% 60%, 50% 50%, 70% 70%;
+    mix-blend-mode: overlay;
+    opacity: 1;
+}
+
+/* Asegurar que el contenido flote por encima del fondo decorativo */
+#pageWrapper > * {
+    position: relative;
+    z-index: 2;
+}
+
+/* ---------- Presentación del contenido central (hero) ---------- */
+.hero-combined__center {
+    /* background: rgba(255,255,255,0.06);
+    backdrop-filter: blur(10px); */
+    /* -webkit-backdrop-filter: blur(10px); */
+    border-radius: 20px;
+    /* border: 1px solid rgba(255,255,255,0.10); */
+    padding: 48px;
+    box-shadow: 0 30px 90px rgba(6,6,12,0.48);
+    display: block;
+}
+
+.hero-combined__center h3,
+.hero-combined__center h2,
+.hero-combined__center h1 {
+    color: #ffffff !important;
+    text-shadow: 0 8px 26px rgba(0,0,0,0.55);
+}
+
+/* Imagen del concurso: redondeo y sombra suave */
+.hero-combined__graphic img {
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    display: block;
+    width: auto;
+    max-width: 100%;
+}
+
+/* Botones: hover con sombra suave en tonos teal/morado */
+.btn-inicio:hover {
+    box-shadow: 0 12px 30px rgba(13,148,136,0.12), 0 6px 18px rgba(147,51,234,0.08);
+}
+
+.btn-inicio-outline:hover {
+    background: rgba(255,255,255,0.06);
+}
+
+/* Reducir el brillo del canvas rastro para que no compita con el nuevo fondo */
+#trailCanvas {
+    mix-blend-mode: screen;
+}
+
+/* Tarjetas informativas con efecto glass morphism */
+.info-card {
+    position: relative;
+    z-index: 1;
+    background: linear-gradient(160deg, rgba(26, 65, 102, 0.84) 0%, rgba(51, 108, 134, 0.82) 44%, rgba(41, 109, 141, 0.8) 100%) !important;
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(149, 179, 255, 0.20) !important;
+    border-radius: 22px;
+    box-shadow: 0 16px 42px rgba(0, 0, 0, 0.28), inset 0 1px 0 rgba(255,255,255,0.08);
+    transition: transform .3s ease, box-shadow .3s ease, background .3s ease, border .3s ease;
+    height: 100%;
+    color: #fff;
+}
+
+.info-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 20px 54px rgba(0, 0, 0, 0.34), 0 0 0 1px rgba(148, 185, 255, 0.14), inset 0 1px 0 rgba(255,255,255,0.10);
+    background: linear-gradient(160deg, rgba(20,31,58,.92) 0%, rgba(40,43,91,.92) 46%, rgba(88,60,139,.90) 100%) !important;
+    border-color: rgba(169, 193, 255, 0.30) !important;
+}
+
+.section-panel {
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+.section-panel--steps {
+    padding-top: 56px;
+    padding-bottom: 48px;
+}
+
+.section-panel--info {
+    padding-top: 8px;
+    padding-bottom: 56px;
+}
+
+.section-panel--docs {
+    background: rgba(4, 8, 24, .18);
+    border-top: 1px solid rgba(255,255,255,.12);
+    padding: 40px 20px;
+}
+
+.hero-combined__graphic {
+    margin: 18px auto 22px;
+    display: flex;
+    justify-content: center;
+}
+
+.hero-combined__graphic img {
+    max-width: min(700px, 95vw);
+    width: 100%;
+    height: auto;
+    display: block;
+    filter: drop-shadow(0 16px 26px rgba(0,0,0,.28));
+}
+
+.info-card__media {
+    margin-bottom: 18px;
+}
+
+.info-card--step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    text-align: center;
+    min-height: 100%;
+    height: 100%;
+    padding: 1.5rem;
+}
+
+.info-card--step p {
+    max-width: 30ch;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.info-card--step .info-card__media img {
+    width: 90px;
+    height: 90px;
+    object-fit: contain;
+}
+
+.info-card--step h5 {
+    margin-bottom: 10px;
+}
+
+.info-card--step p {
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+
+.info-card--details {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    text-align: center;
+    height: 100%;
+}
+
+.info-card--details .icon-circle {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.info-card--details p,
+.info-card--details ul {
+    max-width: 52ch;
+}
+
+.info-card--details p {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.info-card--details ul {
+    display: inline-block;
+    text-align: left;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.info-card--details ul {
+    margin-bottom: 0;
+}
+
+.seccion-pasos .row,
+.seccion-info .row {
+    align-items: stretch;
+}
+
+.seccion-pasos .col-12,
+.seccion-info .col-12 {
+    display: flex;
+    flex-direction: column;
+}
+
+.seccion-pasos .info-card,
+.seccion-info .info-card {
+    flex: 1;
+}
+
+.info-card--resource {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    min-height: 150px;
+}
+
+/* Círculo con icono */
+.info-card .icon-circle {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(74, 159, 213, 0.25), rgba(46, 134, 171, 0.25));
+    border: 2px solid rgba(74, 159, 213, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    transition: all .3s ease;
+}
+
+.info-card:hover .icon-circle {
+    background: linear-gradient(135deg, rgba(74, 159, 213, 0.4), rgba(46, 134, 171, 0.4));
+    border-color: rgba(74, 159, 213, 0.7);
+    transform: scale(1.1);
+}
+
+.info-card .icon-circle i {
+    font-size: 1.8rem;
+    color: #4A9FD5;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, .25);
+}
+
+.info-card h5 {
+    color: #fff;
+    font-weight: 700;
+    font-family: 'Montserrat', sans-serif;
+    margin-bottom: 12px;
+    font-size: 1.22rem;
+    line-height: 1.25;
+}
+
+.info-card p {
+    font-family: 'Montserrat', sans-serif;
+    font-size: .96rem;
+    line-height: 1.75;
+}
+
+.info-card small {
+    line-height: 1.5;
+}
+
+/* Enlaces dentro de tarjetas */
+.info-card a {
+    color: #fff;
+    transition: color .2s;
+}
+
+.info-card a:hover {
+    color: #4A9FD5;
+    text-decoration: none;
+}
+
+/* Sección de documentos / recursos */
+.section-docs {
+    background-color: rgba(0, 0, 0, .15);
+    border-top: 1px solid rgba(255, 255, 255, .2);
+    padding: 40px 20px;
+}
+
+/* Ajustes de container */
+.container {
+    max-width: 1200px;
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+/* Ajustes de row */
+.row {
+    margin-left: -15px;
+    margin-right: -15px;
+}
+
+/* Títulos de sección con línea decorativa dorada */
+.section-title {
+    color: #fff;
+    font-weight: 700;
+    margin-bottom: 40px;
+    position: relative;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 2.2rem;
+    text-shadow: 0 4px 16px rgba(0, 0, 0, .3);
+    font-weight: 800;
+}
+
+.section-title::after {
+    content: '';
+    display: block;
+    width: 80px;
+    height: 5px;
+    background: linear-gradient(90deg, #4A9FD5, #2E86AB);
+    border-radius: 3px;
+    margin: 16px auto 0;
+    box-shadow: 0 2px 8px rgba(74, 159, 213, .4);
+}
+
+/* Listas dentro de tarjetas */
+.info-card ul {
+    list-style: none;
+    padding-left: 0;
+}
+
+.info-card ul li {
+    padding-left: 28px;
+    position: relative;
+    margin-bottom: 8px;
+    line-height: 1.65;
+}
+
+.info-card ul li::before {
+    content: '▸';
+    position: absolute;
+    left: 8px;
+    color: #4A9FD5;
+    font-weight: bold;
+}
+
+/* Responsive - tablets y móviles */
+@media (max-width: 992px) {
+    .hero-combined {
+        padding: 90px 20px 50px;
+    }
+
+    .hero-combined__title {
+        font-size: clamp(3.5rem, 10vw, 6rem);
+        margin-bottom: 28px;
+    }
+
+    .hero-combined__subtitle {
+        font-size: 1.15rem;
+        max-width: 90%;
+    }
+
+    .section-title {
+        font-size: 2rem;
+        margin-bottom: 32px;
+    }
+}
+
+@media (max-width: 768px) {
+    .hero-combined {
+        padding: 80px 16px 40px;
+        min-height: 90vh;
+    }
+
+    .hero-combined__logo {
+        top: 16px;
+        left: 16px;
+    }
+
+    .hero-combined__logo img {
+        max-height: 70px;
+    }
+
+    .hero-combined__title {
+        font-size: clamp(2.8rem, 11vw, 4.5rem);
+        margin-bottom: 24px;
+        letter-spacing: .03em;
+    }
+
+    .hero-combined__subtitle {
+        font-size: 1.05rem;
+        margin-bottom: 32px;
+        line-height: 1.65;
+    }
+
+    .hero-combined__subtitle span {
+        font-size: .92rem;
+        margin-top: 10px;
+    }
+
+    .hero-combined__actions {
+        gap: 12px;
+    }
+
+    .btn-inicio,
+    .btn-inicio-outline {
+        font-size: 1rem;
+        padding: 13px 32px;
+        margin: 4px;
+    }
+
+    .section-title {
+        font-size: 1.75rem;
+        margin-bottom: 28px;
+    }
+
+    .section-title::after {
+        width: 60px;
+        height: 4px;
+        margin: 12px auto 0;
+    }
+
+    .info-card {
+        margin-bottom: 20px;
+    }
+
+    .section-panel--steps {
+        padding-top: 40px;
+        padding-bottom: 36px;
+    }
+
+    .section-panel--info {
+        padding-bottom: 40px;
+    }
+
+    .section-panel--docs {
+        padding: 32px 16px;
+    }
+
+    .info-card .icon-circle {
+        width: 60px;
+        height: 60px;
+    }
+
+    .info-card .icon-circle i {
+        font-size: 1.5rem;
+    }
+
+    .info-card h5 {
+        font-size: 1.15rem;
+        margin-bottom: 10px;
+    }
+
+    .info-card p {
+        font-size: .9rem;
+    }
+
+    .hero-combined__graphic {
+        margin: 14px auto 18px;
+    }
+
+    .hero-combined__graphic img {
+        max-width: 420px;
+    }
+
+    /* Ajustar padding de secciones */
+}
+
+/* Responsive - móviles pequeños */
+@media (max-width: 576px) {
+    .hero-combined {
+        padding: 70px 12px 32px;
+        min-height: 85vh;
+    }
+
+    .hero-combined__logo {
+        top: 12px;
+        left: 12px;
+    }
+
+    .hero-combined__logo img {
+        max-height: 55px;
+    }
+
+    .hero-combined__title {
+        font-size: clamp(2.2rem, 12vw, 3rem);
+        margin-bottom: 20px;
+        letter-spacing: .02em;
+    }
+
+    .hero-combined__subtitle {
+        font-size: .95rem;
+        margin-bottom: 28px;
+        line-height: 1.6;
+    }
+
+    .hero-combined__subtitle span {
+        font-size: .85rem;
+        margin-top: 8px;
+    }
+
+    .hero-combined__actions {
+        flex-direction: column;
+        gap: 10px;
+        width: 100%;
+        padding: 0 8px;
+    }
+
+    .btn-inicio,
+    .btn-inicio-outline {
+        width: 100%;
+        max-width: 100%;
+        font-size: .95rem;
+        padding: 12px 28px;
+        margin: 4px 0;
+    }
+
+    .section-title {
+        font-size: 1.5rem;
+        margin-bottom: 24px;
+    }
+
+    .section-title::after {
+        width: 50px;
+        height: 3px;
+    }
+
+    .info-card {
+        padding: 20px !important;
+        margin-bottom: 16px;
+    }
+
+    .info-card .icon-circle {
+        width: 55px;
+        height: 55px;
+        margin-bottom: 16px;
+    }
+
+    .info-card .icon-circle i {
+        font-size: 1.35rem;
+    }
+
+    .info-card h5 {
+        font-size: 1.1rem;
+        margin-bottom: 8px;
+    }
+
+    .info-card p {
+        font-size: .88rem;
+        line-height: 1.6;
+    }
+
+    .info-card ul li {
+        font-size: .88rem;
+        padding-left: 24px;
+        margin-bottom: 6px;
+    }
+
+    .info-card ul li::before {
+        left: 6px;
+    }
+
+    /* Ajustar padding de secciones en móvil */
+    .section-panel {
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+
+    .section-panel--steps,
+    .section-panel--info {
+        padding-top: 32px;
+        padding-bottom: 32px;
+    }
+
+    .section-panel--docs {
+        padding: 28px 12px;
+    }
+
+    /* Tarjetas de recursos ocupan ancho completo */
+    .section-docs .col-md-5 {
+        padding-left: 12px !important;
+        padding-right: 12px !important;
+    }
+
+    .section-docs .card {
+        min-height: 120px !important;
+        padding: 20px 16px !important;
+    }
+
+    .section-docs .fa-3x {
+        font-size: 2.2rem !important;
+        margin-bottom: 12px !important;
+    }
+
+    .section-docs a {
+        font-size: 1rem !important;
+    }
+
+    .section-docs small {
+        font-size: .8rem !important;
+    }
+}
+
+/* Responsive - móviles muy pequeños (menos de 375px) */
+@media (max-width: 375px) {
+    .hero-combined__title {
+        font-size: 2rem;
+    }
+
+    .hero-combined__subtitle {
+        font-size: .9rem;
+    }
+
+    .hero-combined__subtitle span {
+        font-size: .8rem;
+    }
+
+    .btn-inicio,
+    .btn-inicio-outline {
+        font-size: .9rem;
+        padding: 11px 24px;
+    }
+
+    .info-card {
+        padding: 16px !important;
+    }
+
+    .info-card--resource {
+        min-height: 132px;
+    }
+
+    .info-card .icon-circle {
+        width: 50px;
+        height: 50px;
+    }
+
+    .info-card .icon-circle i {
+        font-size: 1.2rem;
+    }
+
+    .info-card h5 {
+        font-size: 1rem;
+    }
+
+    .info-card p,
+    .info-card ul li {
+        font-size: .85rem;
+    }
+}
+
+/* Mejoras para landscape en móviles */
+@media (max-height: 600px) and (orientation: landscape) {
+    .hero-combined {
+        min-height: auto;
+        padding: 60px 16px 32px;
+    }
+
+    .hero-combined__title {
+        font-size: 2.5rem;
+        margin-bottom: 16px;
+    }
+
+    .hero-combined__subtitle {
+        font-size: .95rem;
+        margin-bottom: 20px;
+    }
+
+    .hero-combined__logo img {
+        max-height: 50px;
+    }
+}
+
+/* Mejoras para tablets en landscape */
+@media (min-width: 768px) and (max-width: 1024px) and (orientation: landscape) {
+    .hero-combined {
+        padding: 80px 20px 40px;
+    }
+
+    .hero-combined__title {
+        font-size: 4.5rem;
+    }
+
+    .hero-combined__subtitle {
+        font-size: 1.15rem;
+    }
+}
+
+/* Mejoras generales de performance y UX */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* Prevenir zoom en inputs en iOS */
+@media screen and (max-width: 768px) {
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    select,
+    textarea {
+        font-size: 16px !important;
+    }
+}
+
+.hero-combined__center {
+    margin-top: 0 !important;
+}

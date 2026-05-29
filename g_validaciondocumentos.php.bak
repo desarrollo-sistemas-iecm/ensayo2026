@@ -1,0 +1,554 @@
+﻿<?php
+session_start();
+$idusuario=$_SESSION['idusuario'];
+
+$id=$_POST['id'];
+$categoria=$_POST['categoria'];
+
+if(isset($_POST['action'])){
+	$action=$_POST['action'];
+
+}else{
+	$action="";
+}
+
+
+
+include('phpmailer/class.phpmailer.php');
+include('phpmailer/class.smtp.php');
+include('phpmailer/PHPMailerAutoload.php');
+include('sqlconnector.php');
+	
+include('rutasitio.php');
+define("UPLOAD_DIR", "uploads/");
+
+
+
+if($action=='update'){//////////////////código del update y el correo
+
+		$id=$_POST["id"];
+
+	    $estatus_ensayo=$_POST["estatus_ensayo"];
+	    $observa_ensayo=$_POST["observa_ensayo"];
+
+	   // $estatus_identifica=$_POST["estatus_identifica"];
+	    //$observa_identifica=$_POST["observa_identifica"];
+
+	  
+
+		$estatus_manifest=$_POST["estatus_manifest"];
+		$observa_manifest=$_POST["observa_manifest"];
+		  
+		$estatus_carta=$_POST["estatus_carta"];
+		$observa_carta=$_POST["observa_carta"];
+
+		//$estatus_formato=$_POST["estatus_formato"];
+		//$observa_formato=$_POST["observa_formato"];
+
+		$observa_requi=$_POST["observa_requi"];
+
+
+	    $query1="SELECT COUNT(idensayo) as numero FROM ".BD_PARTICIPANTES." where folio is not null AND categoria=".$categoria."";
+
+    
+		  $row = sqlsrv_query($conn,$query1);
+          if($res=sqlsrv_fetch_array($row))
+          {
+              
+          	$num=intval($res['numero'])+1;
+          	//echo "  **".$num."**  ";
+          }else{
+
+          	//echo "1"	;
+            die( print_r( sqlsrv_errors(), true));
+            ///echo '<a href="maindistrito.php" class="btn btn-primary">Haz clic aquí para continuar</a>';
+
+          }
+
+          $folio="CE".$categoria."-".$num;
+          $checkfolio=true;
+
+          while($checkfolio){
+
+          	$query2="SELECT count(idensayo) as existe FROM ".BD_PARTICIPANTES." where folio='".$folio."'";
+
+			  $row = sqlsrv_query($conn,$query2);
+	          while($res=sqlsrv_fetch_array($row))
+	          {
+	          	$existe=intval($res["existe"]);
+	          	///echo " --".$existe."--  //".$num."//  ";
+	          	if($existe>=1){
+	          		$num++;
+	          		 $folio="CE".$categoria."-".$num;
+	          		$checkfolio=true;
+	          		//echo "   if:true   ";
+
+	          	}else{
+	          		$checkfolio=false;
+	          		//echo "   if:false   ";
+
+
+	          	}
+	            
+	          	
+	          }
+
+          }
+
+
+    if ($estatus_ensayo==1&&$estatus_carta==1&&$estatus_manifest==1){
+
+
+    	$validado=true;
+
+    }else{
+    	$validado=false;
+    }
+
+    if($validado){
+    	$query = "UPDATE ".BD_PARTICIPANTES." SET status_ensayo = ?, observa_ensayo = ?, status_manifest = ?, observa_manifest = ?, status_carta = ?, observa_carta = ?, observa_requisitos = ?, folio = ?, status_requisitos = ? WHERE idensayo = ?";
+    	$params = array($estatus_ensayo, $observa_ensayo, $estatus_manifest, $observa_manifest, $estatus_carta, $observa_carta, $observa_requi, $folio, $idusuario, $id);
+    }else{
+    	$query = "UPDATE ".BD_PARTICIPANTES." SET status_ensayo = ?, observa_ensayo = ?, status_manifest = ?, observa_manifest = ?, status_carta = ?, observa_carta = ?, observa_requisitos = ?, status_requisitos = ? WHERE idensayo = ?";
+    	$params = array($estatus_ensayo, $observa_ensayo, $estatus_manifest, $observa_manifest, $estatus_carta, $observa_carta, $observa_requi, $idusuario, $id);
+    }
+
+	$row = sqlsrv_query($conn, $query, $params);
+    
+    if($row){
+	    $guardado=true;
+    }else{
+	    $guardado=false;
+    }
+
+    if($guardado){
+	    $query= "SELECT B.correo, B.nombre, B.paterno, B.materno FROM ".BD_PARTICIPANTES." as A INNER JOIN ".BD_USUARIOS." as B ON A.idusuario= B.idusuario and idensayo='".$id."' and A.iddistrito=0";
+
+		$row = sqlsrv_query($conn,$query);
+        if($row && ($res=sqlsrv_fetch_array($row)))
+        {
+        	$correo=$res['correo'];
+        	$nombre=$res['nombre']." ".$res['paterno']." ".$res['materno'];
+        }else{
+            die( print_r( sqlsrv_errors(), true));
+        }
+
+          	/////////////////////////////////////////////correo
+
+          			$mail = new PHPMailer(true);
+					//Luego tenemos que iniciar la validación por SMTP:
+					$mail->IsSMTP();
+					$mail->CharSet = 'utf-8';
+					$mail->SMTPAuth = false;
+					$mail->Host = "145.0.40.63"; // SMTP a utilizar. Por ej. smtp.elserver.com
+					$mail->Username = "actividadesccycp@iecm.mx"; // Correo completo a utilizar
+					$mail->Password = "s1s3c0m"; // Contraseña
+					$mail->Port = 25; // Puerto a utilizar
+					$mail->From = "no-reply@iecm.mx"; // Desde donde enviamos (Para mostrar)
+					$mail->FromName = "Instituto Electoral de la Ciudad de México";
+
+          	if ($validado){
+          		//////correo OK
+
+          		$folio_64=base64_encode("/jF5i/".$folio."/jF5i/");
+
+          		$html = '<!DOCTYPE html>
+<html lang="es">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#f0f2f5;font-family:Arial,Helvetica,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f0f2f5;padding:30px 10px;">
+  <tr><td align="center">
+    <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;border-radius:14px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.13);">
+      <tr>
+        <td style="background:linear-gradient(135deg,#0f2027 0%,#2c5364 55%,#4A9FD5 100%);padding:36px 40px 28px;text-align:center;">
+          <img src="'.URL_CONCU.'img/IECM-1.png" width="80" height="80" alt="IECM" style="display:block;margin:0 auto 14px;">
+          <h1 style="margin:0 0 6px;color:#ffffff;font-size:24px;font-weight:700;">&iexcl;Registro completado!</h1>
+          <p style="margin:0;color:rgba(255,255,255,.75);font-size:14px;">Instituto Electoral de la Ciudad de M&eacute;xico</p>
+          <div style="margin:16px auto 0;width:60px;height:3px;background:linear-gradient(90deg,#22c55e,#16a34a);border-radius:2px;"></div>
+        </td>
+      </tr>
+      <tr>
+        <td style="background:#ffffff;padding:32px 40px 10px;">
+          <p style="margin:0 0 18px;font-size:16px;color:#0f2027;">
+            Estimado/a <strong>'.htmlspecialchars($nombre).'</strong>,
+          </p>
+          <p style="margin:0 0 24px;font-size:14px;color:#374151;line-height:1.7;">
+            Has completado correctamente el registro en el <strong>Concurso de Ensayo 2026</strong>.
+            Tu documentaci&oacute;n ha sido validada exitosamente.
+          </p>
+          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:24px;">
+            <tr>
+              <td style="background:#f0fdf4;border:2px solid #22c55e;border-radius:10px;padding:20px 24px;text-align:center;">
+                <p style="margin:0 0 8px;color:#166534;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;">Tu n&uacute;mero de folio es:</p>
+                <p style="margin:0;font-family:monospace;font-size:28px;font-weight:700;color:#16a34a;">'.htmlspecialchars($folio).'</p>
+              </td>
+            </tr>
+          </table>
+          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:28px;">
+            <tr>
+              <td align="center">
+                <a href="'.URL_CONCU.'descargaracuseweb.php?v='.$folio_64.'"
+                   style="display:inline-block;background:linear-gradient(135deg,#4A9FD5,#2E86AB);color:#ffffff;
+                          text-decoration:none;font-size:15px;font-weight:700;
+                          padding:13px 36px;border-radius:30px;">
+                  Descargar acuse de registro &rarr;
+                </a>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+      <tr>
+        <td style="background:#f8fafc;border-top:1px solid #e2e8f0;padding:20px 40px;text-align:center;">
+          <p style="margin:0 0 4px;font-size:12px;color:#6b7280;">
+            <strong style="color:#2E86AB;">Instituto Electoral de la Ciudad de M&eacute;xico</strong>
+          </p>
+          <p style="margin:0;font-size:11px;color:#9ca3af;line-height:1.7;">
+            Huizaches 25 &bull; Rancho Los Colorines &bull; Tlalpan &bull; C.P. 14386 &bull; Ciudad de M&eacute;xico<br>
+            Conmutador: (55) 5483 3800 &bull; <a href="https://www.iecm.mx" style="color:#4A9FD5;text-decoration:none;">www.iecm.mx</a>
+          </p>
+        </td>
+      </tr>
+    </table>
+  </td></tr>
+</table>
+</body>
+</html>';
+
+
+          //////ok
+
+          	}else{
+
+          		/////correro NOT OK
+          		$html=' 
+					<html>
+					<body style="width:80%; display: block; margin: 0 auto;">
+					<table width="650" border="0">
+			  			<tbody>
+				    		<tr>
+				      			<td width="218"><img src="'.URL_CONCU.'/img/ban-iecm.jpg" width="146" height="151"></td>
+						      	<td width="805"><h1> Concurso de Ensayo 2022 “Retos y perspectivas a 11 años del Presupuesto Participativo en la Ciudad de México”</h1> </td>
+				    		</tr>
+			  			</tbody>
+					</table>
+					<hr>
+
+					<div style="align:center">
+						<p align="justify"><h3>Estimada(o) '.$nombre.'.</h3></p>
+							
+							<br>
+						
+						<p align="justify">Este correo automático ha sido enviado para notificar que la documentación
+                        proporcionada para el Concurso de Ensayo 2022 “Retos y perspectivas a 11 años del Presupuesto Participativo en la Ciudad de México”, está incompleta o incorrecta.
+                        <br>
+                        Aquí las observaciones sobre cada uno de los documentos:</p>';
+							 
+							 
+							
+							
+							if($estatus_ensayo==1) $var_A="Correcto";
+							else $var_A="Incorrecto";	
+		
+				
+							if($estatus_manifest==1) $var_D="Correcto";
+							else $var_D="Incorrecto";	
+							
+							if($estatus_carta==1) $var_E="Correcto";
+							else $var_E="Incorrecto";	
+							
+					
+
+						$html .= '
+          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:20px;border-radius:8px;overflow:hidden;border:1px solid #e2e8f0;">
+            <tr style="background:#2c5364;">
+              <td style="padding:10px 14px;color:#ffffff;font-size:13px;font-weight:700;">Documento</td>
+              <td style="padding:10px 14px;color:#ffffff;font-size:13px;font-weight:700;">Estatus</td>
+              <td style="padding:10px 14px;color:#ffffff;font-size:13px;font-weight:700;">Observaciones</td>
+            </tr>
+            <tr style="background:#fefce8;">
+              <td style="padding:10px 14px;font-size:13px;color:#374151;border-top:1px solid #e2e8f0;">Ensayo</td>
+              <td style="padding:10px 14px;font-size:13px;font-weight:700;border-top:1px solid #e2e8f0;color:'.($estatus_ensayo == 1 ? '#16a34a' : '#dc2626').';">'.htmlspecialchars($var_A).'</td>
+              <td style="padding:10px 14px;font-size:13px;color:#374151;border-top:1px solid #e2e8f0;">'.htmlspecialchars($observa_ensayo).'</td>
+            </tr>
+            <tr style="background:#ffffff;">
+              <td style="padding:10px 14px;font-size:13px;color:#374151;border-top:1px solid #e2e8f0;">Manifestaci&oacute;n bajo protesta</td>
+              <td style="padding:10px 14px;font-size:13px;font-weight:700;border-top:1px solid #e2e8f0;color:'.($estatus_manifest == 1 ? '#16a34a' : '#dc2626').';">'.htmlspecialchars($var_D).'</td>
+              <td style="padding:10px 14px;font-size:13px;color:#374151;border-top:1px solid #e2e8f0;">'.htmlspecialchars($observa_manifest).'</td>
+            </tr>
+            <tr style="background:#fefce8;">
+              <td style="padding:10px 14px;font-size:13px;color:#374151;border-top:1px solid #e2e8f0;">Carta de cesi&oacute;n de derechos</td>
+              <td style="padding:10px 14px;font-size:13px;font-weight:700;border-top:1px solid #e2e8f0;color:'.($estatus_carta == 1 ? '#16a34a' : '#dc2626').';">'.htmlspecialchars($var_E).'</td>
+              <td style="padding:10px 14px;font-size:13px;color:#374151;border-top:1px solid #e2e8f0;">'.htmlspecialchars($observa_carta).'</td>
+            </tr>
+          </table>';
+
+						if (!empty($observa_requi)) {
+							$html .= '
+          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:20px;">
+            <tr>
+              <td style="background:#fff7ed;border-left:4px solid #f59e0b;border-radius:0 8px 8px 0;padding:14px 16px;">
+                <p style="margin:0 0 4px;font-size:12px;font-weight:700;color:#92400e;text-transform:uppercase;letter-spacing:.05em;">Observaci&oacute;n general</p>
+                <p style="margin:0;font-size:13px;color:#78350f;line-height:1.65;">'.htmlspecialchars($observa_requi).'</p>
+              </td>
+            </tr>
+          </table>';
+						}
+
+						$html .= '
+          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:28px;">
+            <tr>
+              <td align="center">
+                <a href="'.URL_CONCU.'index.php"
+                   style="display:inline-block;background:linear-gradient(135deg,#4A9FD5,#2E86AB);color:#ffffff;
+                          text-decoration:none;font-size:15px;font-weight:700;
+                          padding:13px 36px;border-radius:30px;">
+                  Corregir documentos &rarr;
+                </a>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+      <tr>
+        <td style="background:#f8fafc;border-top:1px solid #e2e8f0;padding:20px 40px;text-align:center;">
+          <p style="margin:0 0 4px;font-size:12px;color:#6b7280;">
+            <strong style="color:#2E86AB;">Instituto Electoral de la Ciudad de M&eacute;xico</strong>
+          </p>
+          <p style="margin:0;font-size:11px;color:#9ca3af;line-height:1.7;">
+            Huizaches 25 &bull; Rancho Los Colorines &bull; Tlalpan &bull; C.P. 14386 &bull; Ciudad de M&eacute;xico<br>
+            Conmutador: (55) 5483 3800 &bull; <a href="https://www.iecm.mx" style="color:#4A9FD5;text-decoration:none;">www.iecm.mx</a>
+          </p>
+        </td>
+      </tr>
+    </table>
+  </td></tr>
+</table>
+</body>
+</html>';
+
+          		/////not ok
+
+          	}
+
+          	 				try{
+								//$destinatario1 = 'nancy.hernandez@iecm.mx';
+								//$destinatario2 = 'nancy.hernandez@iecm.mx';	
+					
+
+								//$mail->AddAddress($destinatario1); // Esta es la dirección a donde enviamos
+								$mail->AddAddress($correo); // Esta es la dirección a donde enviamos
+								//$mail->AddAddress($email);
+								//$mail->AddAddress($destinatario2);// Esta es la dirección a donde enviamos
+								//$mail->AddAddress($destinatario3);// Esta es la dirección a donde enviamos
+
+								///////////////------>>>>>
+								//$mail->AddCC("inscripciones@iedf.org.mx"); // Copia
+								//$mail->AddBCC("inscripciones@iedf.org.mx"); // Copia oculta
+
+							//	$mail->AddBCC("nancy.hernandez@iecm.mx"); // Copia oculta
+								$mail->AddBCC("concursos@iecm.mx"); // Copia oculta
+
+
+
+								$mail->IsHTML(true); // El correo se envía como HTML
+								$mail->Subject = "Sistema de Registro de Concursos de Divulgacion"; // Este es el titulo del email.
+								$mail->Body = $html; // Mensaje a enviar
+								
+								$exito = $mail->Send(); // Envía el correo.
+								
+
+								//$exito ="1";//
+								//$exito =0;//
+					
+									if($exito):
+
+
+									else:
+		
+
+									 
+
+
+									endif;
+							}//try
+							catch (Exception $e) {
+					
+							      echo "Excepción: ".$e->getMessage();
+							};//catch
+
+                    
+
+                    		$mail->ClearAddresses();
+
+
+
+          	//////////////////////////////////////////////fin correo
+
+			// Respuesta JSON para SweetAlert
+			if ($validado) {
+				echo json_encode(['ok' => true, 'folio' => $folio, 'nombre' => $nombre]);
+			} else {
+				echo json_encode(['ok' => false, 'nombre' => $nombre]);
+			}
+    } else {
+        echo json_encode(['ok' => null, 'msg' => 'Error al guardar en la base de datos']);
+    }
+
+
+///////////////////////////////////////////// fin código del update y el correo
+
+
+
+
+}else{//////////////////////////////////////////////código con el listado de archivo
+
+		$query="SELECT * FROM ".BD_PARTICIPANTES." WHERE idensayo =".$id."";
+
+		$res=sqlsrv_query($conn,$query);
+		
+		if ($res) {
+			$row = sqlsrv_fetch_array($res);
+		} else {
+			$row = null;
+		}
+
+		$categoria=$row["categoria"];
+
+		$ensayo=$row["ensayo"];
+		$status_ensayo=$row["status_ensayo"];
+		$observa_ensayo=$row["observa_ensayo"];
+
+		$manifestacion=$row["manifestacion"];
+		$status_manifest=$row["status_manifest"];
+		$observa_manifest=$row["observa_manifest"];
+
+		$cartacesion=$row["cartacesion"];
+		$status_carta=$row["status_carta"];
+		$observa_carta=$row["observa_carta"];
+
+		$observa_requisitos=$row["observa_requisitos"];
+
+		?>
+<div class="vd-card">
+    <div class="vd-header">
+        <i class="fas fa-file-alt" style="margin-right:8px;opacity:.85;"></i>Validación de documentos
+    </div>
+    <div class="vd-body">
+        <input type="hidden" id="id" name="id" value="<?php echo $id; ?>">
+        <input type="hidden" id="categoria" name="categoria" value="<?php echo $categoria; ?>">
+
+        <!-- Ensayo -->
+        <div class="vd-section">
+            <div class="vd-section__label"><i class="fas fa-book" style="margin-right:5px;"></i>Ensayo</div>
+            <div class="vd-field-row">
+                <div class="vd-field-col vd-field-col--file">
+                    <?php if ($ensayo): ?>
+                    <a href="<?php echo UPLOAD_DIR.$ensayo; ?>" target="_blank" class="btn-view-file">
+                        <i class="fas fa-file-pdf"></i> Ver ensayo
+                    </a>
+                    <?php else: ?>
+                    <span class="vd-nofile"><i class="fas fa-exclamation-circle"></i> No existe el ensayo</span>
+                    <?php endif; ?>
+                </div>
+                <div class="vd-field-col vd-field-col--status">
+                    <label class="vd-label">Estatus</label>
+                    <select class="vd-select" name="select_estatus_ensayo" id="select_estatus_ensayo">
+                        <option value="0" disabled <?php echo ($status_ensayo == 0) ? 'selected' : ''; ?>>Nuevo</option>
+                        <option value="1" <?php echo ($status_ensayo == 1) ? 'selected' : ''; ?>>Correcto</option>
+                        <option value="2" <?php echo ($status_ensayo == 2) ? 'selected' : ''; ?>>Incorrecto</option>
+                    </select>
+                </div>
+                <div class="vd-field-col vd-field-col--obs">
+                    <label class="vd-label">Observaciones</label>
+                    <input type="text" class="vd-input" name="observa_ensayo" id="observa_ensayo"
+                        value="<?php echo htmlspecialchars($observa_ensayo ?? ''); ?>" maxlength="799"
+                        placeholder="Escribe una observación...">
+                </div>
+            </div>
+        </div>
+
+        <!-- Manifestación bajo protesta -->
+        <div class="vd-section">
+            <div class="vd-section__label"><i class="fas fa-file-signature" style="margin-right:5px;"></i>Manifestación
+                bajo protesta</div>
+            <div class="vd-field-row">
+                <div class="vd-field-col vd-field-col--file">
+                    <?php if ($manifestacion): ?>
+                    <a href="<?php echo UPLOAD_DIR.$manifestacion; ?>" target="_blank" class="btn-view-file">
+                        <i class="fas fa-file-pdf"></i> Ver manifestación
+                    </a>
+                    <?php else: ?>
+                    <span class="vd-nofile"><i class="fas fa-exclamation-circle"></i> No existe la manifestación</span>
+                    <?php endif; ?>
+                </div>
+                <div class="vd-field-col vd-field-col--status">
+                    <label class="vd-label">Estatus</label>
+                    <select class="vd-select" name="select_estatus_manifest" id="select_estatus_manifest">
+                        <option value="0" disabled <?php echo ($status_manifest == 0) ? 'selected' : ''; ?>>Nuevo
+                        </option>
+                        <option value="1" <?php echo ($status_manifest == 1) ? 'selected' : ''; ?>>Correcto</option>
+                        <option value="2" <?php echo ($status_manifest == 2) ? 'selected' : ''; ?>>Incorrecto</option>
+                    </select>
+                </div>
+                <div class="vd-field-col vd-field-col--obs">
+                    <label class="vd-label">Observaciones</label>
+                    <input type="text" class="vd-input" name="observa_manifest" id="observa_manifest"
+                        value="<?php echo htmlspecialchars($observa_manifest ?? ''); ?>" maxlength="799"
+                        placeholder="Escribe una observación...">
+                </div>
+            </div>
+        </div>
+
+        <!-- Carta de cesión de derechos -->
+        <div class="vd-section">
+            <div class="vd-section__label"><i class="fas fa-file-contract" style="margin-right:5px;"></i>Carta de cesión
+                de derechos</div>
+            <div class="vd-field-row">
+                <div class="vd-field-col vd-field-col--file">
+                    <?php if ($cartacesion): ?>
+                    <a href="<?php echo UPLOAD_DIR.$cartacesion; ?>" target="_blank" class="btn-view-file">
+                        <i class="fas fa-file-pdf"></i> Ver carta
+                    </a>
+                    <?php else: ?>
+                    <span class="vd-nofile"><i class="fas fa-exclamation-circle"></i> No existe la carta</span>
+                    <?php endif; ?>
+                </div>
+                <div class="vd-field-col vd-field-col--status">
+                    <label class="vd-label">Estatus</label>
+                    <select class="vd-select" name="select_estatus_cesion" id="select_estatus_cesion">
+                        <option value="0" disabled <?php echo ($status_carta == 0) ? 'selected' : ''; ?>>Nuevo</option>
+                        <option value="1" <?php echo ($status_carta == 1) ? 'selected' : ''; ?>>Correcto</option>
+                        <option value="2" <?php echo ($status_carta == 2) ? 'selected' : ''; ?>>Incorrecto</option>
+                    </select>
+                </div>
+                <div class="vd-field-col vd-field-col--obs">
+                    <label class="vd-label">Observaciones</label>
+                    <input type="text" class="vd-input" name="observa_cesion" id="observa_cesion"
+                        value="<?php echo htmlspecialchars($observa_carta ?? ''); ?>" maxlength="799"
+                        placeholder="Escribe una observación...">
+                </div>
+            </div>
+        </div>
+
+        <!-- Observaciones generales -->
+        <div class="vd-section">
+            <div class="vd-section__label"><i class="fas fa-comment-dots" style="margin-right:5px;"></i>Observaciones
+                generales de requisitos</div>
+            <textarea class="vd-textarea" name="observa_requi" id="observa_requi" maxlength="799"
+                placeholder="Escribe las observaciones sobre el cumplimiento de requisitos..."><?php echo htmlspecialchars($observa_requisitos ?? ''); ?></textarea>
+        </div>
+
+        <!-- Acciones -->
+        <div class="vd-actions">
+            <div id="div_errors"></div>
+            <button type="button" class="btn-vd-save" id="btn_guardar" onclick="fnguardarvalidaciones(this)">
+                <i class="fas fa-save"></i> Guardar validación
+            </button>
+        </div>
+    </div>
+</div>
+<?php	
+}
+
+?>

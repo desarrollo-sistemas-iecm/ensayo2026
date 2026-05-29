@@ -1,0 +1,219 @@
+<?php
+require('libs/tcpdf.php');
+include_once("sqlconnector.php");
+$folio=$_POST['folio'];
+//$folio="CDA-1";
+
+include('cat_alcaldia.php');
+
+$vg_mes=array('','enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre');
+
+
+   	$query="SELECT * FROM ".BD_PARTICIPANTES." WHERE folio ='".$folio."'";
+
+		$res=sqlsrv_query($conn,$query);
+		if($row= sqlsrv_fetch_array($res)){
+
+		$nombre_completo=$row["nombre"]." ".$row["paterno"]." ".$row["materno"];
+
+
+        $titulo=$row["titulo"];
+	   $seudonimo=$row["sobrenombre"];
+		
+    	//$status_doc1=$row["status_doc1"];
+    	$fecha_nacimiento=$row["fecha_nacimiento"];
+    
+    	$correo=$row["correo"];
+    	$tel1=$row["tel1"];
+    	$tel2=$row["tel2"];
+      
+    	$genero=$row["genero"];
+   
+        $demarcacion=$row['alcaldia'];
+        $entidad=$row['entidad'];    
+        $status_carta= "Sí";
+        $proteccion="Sí";
+        $fecha_alta=$row["fecha_alta"];
+
+ 	//$años_hoy=date_diff(date_create($fecha_nacimiento), date_create('today'))->y;
+   $edad=date_diff(date_create($fecha_nacimiento), date_create('today'))->y;
+            
+	}
+$categoria= $row["categoria"];
+
+$cat_categoria2=array("0","A","B","C","D");
+
+        $dia=date_format(date_create(),"d");
+          $mes_num=intval(date_format(date_create(),"m"));
+          $mes=$vg_mes[$mes_num];
+
+   
+
+
+$pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+// set document information
+$pdf->SetCreator(PDF_CREATOR);
+$pdf->SetAuthor('IECM');
+$pdf->SetTitle('IECM');
+$pdf->SetSubject('IECM');
+//$pdf->SetKeywords('TCPDF, PDF, example, test, guide');
+// remove default header/footer
+$pdf->setPrintHeader(false);
+$pdf->setPrintFooter(false);
+// set default monospaced font
+$pdf->SetDefaultMonospacedFont(PDF_FONT_MONOSPACED);
+// set margins
+$pdf->SetMargins(10,5,10, true);
+// set auto page breaks
+//$pdf->SetAutoPageBreak(TRUE, 20);
+// set image scale factor
+$pdf->setImageScale(PDF_IMAGE_SCALE_RATIO);
+// set some language-dependent strings (optional)
+if (@file_exists('libs/include/lang/spa.php')) {
+	require_once('libs/include/lang/spa.php');
+	$pdf->setLanguageArray($l);
+}
+// ---------------------------------------------------------
+// set font
+$pdf->SetFont('helvetica', '', 8);
+
+
+//$html="---";
+   		$pdf->AddPage();
+   
+        $pdf->Image('img/IECM-1.png', 15, 8, 20, 20, 'PNG', '', '', true, 150, '', false, false, 0, false, false, false);		
+        $pdf->Image('img/ensayo.png', 165, 8, 20, 20, 'PNG', '', '', true, 150, '', false, false, 0, false, false, false);		
+
+					$html='
+                         <p>&nbsp;</p>
+		            <table>
+		            	<tr>
+		            				<td ></td>
+                
+                            <td><h3>Folio: '.$folio.'</h3></td>
+		            	</tr>
+                                    <tr>
+                                    	<td ></td>
+                                    <td><h3>Categoria: '.$categoria.'</h3></td>
+                                    </tr>
+		            </table>
+		            <p>&nbsp;</p>
+
+		            <table>
+                        <tr>
+                            <td align="center"><h3> Concurso de Ensayo 2022 “Retos y perspectivas a 11 años del presupuesto participativo en la Ciudad de México”</h3></td>
+                            </tr>
+		            	<tr>
+                            <td align="center"><h3>ACUSE DE REGISTRO DE LA PERSONA PARTICIPANTE</h3></td>
+		             	</tr>
+                        
+                            
+		            </table>
+		            <p>&nbsp;</p>
+		            <table>
+		            	<tr>
+		          <td align="justify">El Instituto Electoral de la Ciudad de México (IECM) te da la bienvenida como participante de este concurso.
+                            </td>
+                        </tr>
+                     <p>&nbsp;</p>
+		            </table>
+		            <p>&nbsp;</p>
+
+		            <table align="justify" style="font-size:8pt;">
+		            	
+                        <tr> 
+                            <td >Título del ensayo:  <b>'.$titulo.' </b></td>
+		            	</tr>
+                        
+                         <tr>
+                            <td ><p>Seudónimo:  <b>'.$seudonimo.' </b></p>
+                            </tr> 
+                         
+                         <tr>  
+                        <td ><p> Nombre completo de la persona participante:  <b>'.$nombre_completo.' </b>&nbsp;&nbsp;&nbsp;&nbsp; Sexo:  <b> '.$genero.' </b>&nbsp;&nbsp;&nbsp;&nbsp;Edad: <b>'.$edad.' </b></p>   </td>
+		            		</tr> 
+                         
+                         <tr>
+                           <td > <p>Correo electrónico:  <b>'.$correo.' </b></p>   </td>
+                          </tr> 
+                             
+                         <tr>
+                           <td > <p>Fecha de nacimiento: <b>'.$fecha_nacimiento.'</b></p>   </td>
+                        </tr> 
+                          
+                         <tr>
+                             <td ><p>Teléfono fijo:  <b>'.$tel1.' </b>	Teléfono móvil: <b>'.$tel2.' </b></p>  </td>
+                         </tr>
+                         
+                         <tr>
+                            <td ><p>Carta de cesión de derechos:  <b> '.$status_carta.' </b></p>   </td>
+                            </tr> 
+                            
+                         <tr>
+							<td ><p>Manifestación bajo protesta: <b>'.$proteccion.'</b></p>   </td>
+                        </tr>
+                    
+                           <tr>
+							<td><p>Lugar de residencia: <b>'.($demarcacion =="18" ? $entidad : $cat_alcaldia[$demarcacion] ).'</b></p>   </td>
+                        </tr>  
+                      
+             </table>
+             <p>&nbsp;</p>
+             <p>&nbsp;</p>';
+  
+
+
+
+                    $html.='<table style="line-height: 85%;">
+				            	<tr>
+				            		<td  style="font-size:7pt;">
+                                    	<p align="center"><strong>AVISO DE PRIVACIDAD
+SISTEMA DE REGISTRO DE PARTICIPANTES EN LOS CONCURSOS PARA LA PROMOCIÓN DE LA PARTICIPACIÓN CIUDADANA Y DIVULGACIÓN DE LA CULTURA DEMOCRÁTICA</strong></p>
+
+
+				            		<p align="center"><strong>AVISO DE PRIVACIDAD SIMPLIFICADO</strong></p>
+                             </td></tr>
+ <p>&nbsp;</p>
+
+
+<p align="justify">El Instituto Electoral de la Ciudad de México (Instituto Electoral), a través de la Dirección Ejecutiva de Educación Cívica y Construcción de Ciudadanía, es el Responsable del tratamiento de los datos personales que nos proporcione, los cuales serán protegidos en el Sistema de registro de participantes en los concursos para la promoción de la participación ciudadana y divulgación de la cultura democrática.
+ <p>&nbsp;</p>
+
+Los datos personales recabados serán utilizados con la finalidad de llevar a cabo el registro de datos personales de las personas interesadas en participar en los concursos que organice, promueva o difunda el Instituto Electoral; y podrán ser transferidos a la Comisión de Derechos Humanos de la Ciudad de México, para la investigación de quejas y denuncias por presuntas violaciones a los derechos humanos; Instituto de Transparencia, Acceso a la Información Pública, Protección de Datos Personales y Rendición de Cuentas de la Ciudad de México, para la sustanciación de recursos de revisión, recurso de inconformidad, denuncias y el procedimiento para determinar el presunto incumplimiento a la Ley de Protección de Datos Personales en Posesión de Sujetos Obligados de la Ciudad de México; la Auditoría Superior de la Ciudad de México, para la realización de auditorías o realización de investigaciones por presuntas faltas administrativas; Órganos de Control Interno, para la realización de auditorías o desarrollo de investigaciones por presuntas faltas administrativas; Órganos Jurisdiccionales Locales y Federales, para la sustanciación de los procedimientos jurisdiccionales tramitados por ellos y el Instituto Nacional Electoral, para la sustanciación de procedimientos administrativos sancionadores.
+ <p>&nbsp;</p>
+
+Este Sistema de Datos Personales no cuenta con Encargados; ni con Despacho de Auditores Externos encargados del ejercicio de las funciones de fiscalización.
+ <p>&nbsp;</p>
+
+Usted podrá manifestar la negativa al tratamiento de sus datos personales directamente ante la Unidad de Transparencia del Instituto Electoral, ubicada en la Calle de Huizaches No. 25, Colonia Rancho los Colorines, Planta Baja, Alcaldía Tlalpan, C. P. 14386, Ciudad de México, con número telefónico 54833800 a la extensión 4725, o bien a través de la Plataforma Nacional de Transparencia http://www.plataformadetransparencia.org.mx/ o en el correo electrónico unidad.transparencia@iecm.mx.
+
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+
+<p align="center">Instituto Electoral de la Ciudad de M&eacute;xico &copy;</p>
+<p align="center">Huizaches 25 &bull; Rancho Los Colorines &bull; Tlalpan &bull; C.P. 14386 &bull; Ciudad de M&eacute;xico &bull; Conmutador: (55) 5483 3800</p>
+				            	
+		            		</table>
+		            		<p>&nbsp;</p>';
+
+	
+		$pdf->writeHTML($html, true, false, true, false, '');
+
+
+   	
+ob_end_clean();
+$pdf->Output('acuse.pdf', 'I');
+
+
+
+
+
+
+
+
+
+
+?>
+
