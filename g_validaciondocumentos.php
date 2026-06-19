@@ -35,52 +35,49 @@ if($action=='update'){//////////////////código del update y el correo
 		$observa_requi=$_POST["observa_requi"];
 
 
-	    $query1="SELECT COUNT(idensayo) as numero FROM ".BD_PARTICIPANTES." where folio is not null AND categoria=".$categoria."";
+		// Modificado por Bruno Corona: Se verifica si el participante ya cuenta con un folio asignado 
+		// para evitar que se reasigne o se genere uno nuevo si ya existe en la base de datos.
+		$query_check = "SELECT folio FROM ".BD_PARTICIPANTES." WHERE idensayo = ?";
+		$stmt_check = sqlsrv_query($conn, $query_check, array($id));
+		$folio = null;
+		if ($stmt_check && $res_check = sqlsrv_fetch_array($stmt_check)) {
+			$folio = $res_check['folio'];
+		}
 
-    
-		  $row = sqlsrv_query($conn,$query1);
-          if($res=sqlsrv_fetch_array($row))
-          {
-              
-          	$num=intval($res['numero'])+1;
-          	//echo "  **".$num."**  ";
-          }else{
+		if (empty($folio)) {
+			// Si no tiene folio, se genera uno nuevo
+			$query1="SELECT COUNT(idensayo) as numero FROM ".BD_PARTICIPANTES." where folio is not null AND categoria=".$categoria."";
+
+			$row = sqlsrv_query($conn,$query1);
+			if($res=sqlsrv_fetch_array($row))
+			{
+				$num=intval($res['numero'])+1;
+			}else{
 
           	//echo "1"	;
-            die( print_r( sqlsrv_errors(), true));
-            ///echo '<a href="maindistrito.php" class="btn btn-primary">Haz clic aquí para continuar</a>';
+				die( print_r( sqlsrv_errors(), true));
+			}
 
-          }
+			$folio="CE".$categoria."-".$num;
+			$checkfolio=true;
 
-          $folio="CE".$categoria."-".$num;
-          $checkfolio=true;
+			while($checkfolio){
+				$query2="SELECT count(idensayo) as existe FROM ".BD_PARTICIPANTES." where folio='".$folio."'";
 
-          while($checkfolio){
-
-          	$query2="SELECT count(idensayo) as existe FROM ".BD_PARTICIPANTES." where folio='".$folio."'";
-
-			  $row = sqlsrv_query($conn,$query2);
-	          while($res=sqlsrv_fetch_array($row))
-	          {
-	          	$existe=intval($res["existe"]);
-	          	///echo " --".$existe."--  //".$num."//  ";
-	          	if($existe>=1){
-	          		$num++;
-	          		 $folio="CE".$categoria."-".$num;
-	          		$checkfolio=true;
-	          		//echo "   if:true   ";
-
-	          	}else{
-	          		$checkfolio=false;
-	          		//echo "   if:false   ";
-
-
-	          	}
-	            
-	          	
-	          }
-
-          }
+				$row = sqlsrv_query($conn,$query2);
+				while($res=sqlsrv_fetch_array($row))
+				{
+					$existe=intval($res["existe"]);
+					if($existe>=1){
+						$num++;
+						$folio="CE".$categoria."-".$num;
+						$checkfolio=true;
+					}else{
+						$checkfolio=false;
+					}
+				}
+			}
+		}
 
     if ($estatus_ensayo==1){
     	$validado=true;

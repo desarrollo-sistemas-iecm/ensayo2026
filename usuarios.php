@@ -65,7 +65,7 @@ if (isset($_POST['action'])) {
 		exit;
 	}
 
-	if ($action === 'insert') {
+	if ($action === 'registrar') {
 		// ✅ PHP 8+ Compatible: Prepared statement para prevenir SQL injection
 		$query = 'INSERT INTO ' . BD_USUARIOS . ' (nombre, paterno, materno, curp, area, genero, fecha_nacimiento, correo, usuario, contrasena, perfil, estatus, fecha_alta) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
 		$params = [

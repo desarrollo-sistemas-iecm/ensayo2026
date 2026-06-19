@@ -4,9 +4,9 @@ session_start();
 error_reporting(E_ALL ^ E_NOTICE);
 
 if (!isset($_SESSION['idusuario'])) {
-    http_response_code(401);
-    echo 'Sesion no valida.';
-    exit;
+  http_response_code(401);
+  echo 'Sesion no valida.';
+  exit;
 }
 
 $idJuez = intval($_SESSION['idusuario']);
@@ -25,101 +25,109 @@ if (!$rowPerfil || intval($rowPerfil['perfil']) !== 3) {
 $accion = $_POST['action'] ?? '';
 
 if ($accion === 'save') {
-    header('Content-Type: application/json; charset=utf-8');
+  header('Content-Type: application/json; charset=utf-8');
 
-    $idensayo = intval($_POST['idensayo'] ?? 0);
-    $categoria = intval($_POST['categoria'] ?? 0);
-    $cal1 = floatval($_POST['califica1'] ?? 0);
-    $cal2 = floatval($_POST['califica2'] ?? 0);
-    $cal3 = floatval($_POST['califica3'] ?? 0);
-    $cal4 = floatval($_POST['califica4'] ?? 0);
-    $cal5 = floatval($_POST['califica5'] ?? 0);
-    $cal6 = floatval($_POST['califica6'] ?? 0);
-    $observaciones = trim($_POST['observaciones_gral'] ?? '');
+  $idensayo = intval($_POST['idensayo'] ?? 0);
+  $categoria = intval($_POST['categoria'] ?? 0);
+  $cal1 = floatval($_POST['califica1'] ?? 0);
+  $cal2 = floatval($_POST['califica2'] ?? 0);
+  $cal3 = floatval($_POST['califica3'] ?? 0);
+  $cal4 = floatval($_POST['califica4'] ?? 0);
+  $cal5 = floatval($_POST['califica5'] ?? 0);
+  $cal6 = floatval($_POST['califica6'] ?? 0);
+  $observaciones = trim($_POST['observaciones_gral'] ?? '');
 
-    if ($idensayo <= 0) {
-        echo json_encode(array('ok' => false, 'msg' => 'Ensayo invalido.')); 
-        exit;
-    }
-
-    $queryEnsayo = "SELECT idusuario, nombre, paterno, materno, categoria FROM " . BD_PARTICIPANTES . " WHERE idensayo = ?";
-    $resEnsayo = sqlsrv_query($conn, $queryEnsayo, array($idensayo));
-    $rowEnsayo = $resEnsayo ? sqlsrv_fetch_array($resEnsayo) : null;
-
-    if (!$rowEnsayo) {
-        echo json_encode(array('ok' => false, 'msg' => 'No se encontro el ensayo.'));
-        exit;
-    }
-
-    $idParticipante = intval($rowEnsayo['idusuario']);
-    $nombreCompleto = trim(($rowEnsayo['nombre'] ?? '') . ' ' . ($rowEnsayo['paterno'] ?? '') . ' ' . ($rowEnsayo['materno'] ?? ''));
-    $categoriaFinal = intval($rowEnsayo['categoria'] ?? $categoria);
-
-    $fechaActual = date('Y-m-d H:i:s');
-    $totalCalificacion = round($cal1 + $cal2 + $cal3 + $cal4 + $cal5 + $cal6, 1);
-
-    $queryExiste = "SELECT idcalifica FROM calificaciones WHERE idusuario = ? AND nombre_juez = ?";
-    $resExiste = sqlsrv_query($conn, $queryExiste, array($idParticipante, $nombreJuez));
-    $rowExiste = $resExiste ? sqlsrv_fetch_array($resExiste) : null;
-
-    // Si ya existe calificación del mismo juez para este participante, no permitir nueva calificación
-    if ($rowExiste) {
-      echo json_encode(array('ok' => false, 'msg' => 'Este ensayo ya fue calificado por usted. No puede calificarlo nuevamente.'));
-      exit;
-    }
-
-    // Insertar nueva calificación
-    $querySave = "INSERT INTO calificaciones
-              (nombre_completo, categoria, nombre_juez, califica1, califica2, califica3, califica4, califica5, califica6,
-               fecha_alta, fecha_modifica, observaciones_gral, total, idusuario)
-              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-    $paramsSave = array(
-      $nombreCompleto,
-      $categoriaFinal,
-      $nombreJuez,
-      $cal1,
-      $cal2,
-      $cal3,
-      $cal4,
-      $cal5,
-      $cal6,
-      $fechaActual,
-      $fechaActual,
-      $observaciones,
-      $totalCalificacion,
-      $idParticipante
-    );
-
-    $ok = sqlsrv_query($conn, $querySave, $paramsSave);
-
-    if ($ok) {
-        echo json_encode(array('ok' => true, 'msg' => 'Calificacion guardada correctamente.'));
-    } else {
-        echo json_encode(array('ok' => false, 'msg' => 'No se pudo guardar la calificacion.'));
-    }
+  if ($idensayo <= 0) {
+    echo json_encode(array('ok' => false, 'msg' => 'Ensayo invalido.'));
     exit;
+  }
+
+  $queryEnsayo = "SELECT idusuario, nombre, paterno, materno, categoria FROM " . BD_PARTICIPANTES . " WHERE idensayo = ?";
+  $resEnsayo = sqlsrv_query($conn, $queryEnsayo, array($idensayo));
+  $rowEnsayo = $resEnsayo ? sqlsrv_fetch_array($resEnsayo) : null;
+
+  if (!$rowEnsayo) {
+    echo json_encode(array('ok' => false, 'msg' => 'No se encontro el ensayo.'));
+    exit;
+  }
+
+  $idParticipante = intval($rowEnsayo['idusuario']);
+  $nombreCompleto = trim(($rowEnsayo['nombre'] ?? '') . ' ' . ($rowEnsayo['paterno'] ?? '') . ' ' . ($rowEnsayo['materno'] ?? ''));
+  $categoriaFinal = intval($rowEnsayo['categoria'] ?? $categoria);
+
+  $fechaActual = date('Y-m-d H:i:s');
+  $totalCalificacion = round($cal1 + $cal2 + $cal3 + $cal4 + $cal5 + $cal6, 1);
+
+  $queryExiste = "SELECT idcalifica FROM calificaciones WHERE idjuez = ? AND idensayo = ?";
+  $resExiste = sqlsrv_query($conn, $queryExiste, array($idJuez, $idensayo));
+  $rowExiste = $resExiste ? sqlsrv_fetch_array($resExiste) : null;
+
+  // Si ya existe calificación del mismo juez para este participante, no permitir nueva calificación
+  if ($rowExiste) {
+    echo json_encode(array('ok' => false, 'msg' => 'Este ensayo ya fue calificado por usted. No puede calificarlo nuevamente.'));
+    exit;
+  }
+
+  // Insertar nueva calificación
+  $querySave = "INSERT INTO calificaciones
+              (nombre_completo, categoria, nombre_juez, califica1, califica2, califica3, califica4, califica5, califica6,
+               fecha_alta, fecha_modifica, observaciones_gral, total, idusuario, idensayo, idjuez)
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+  $paramsSave = array(
+    $nombreCompleto,
+    $categoriaFinal,
+    $nombreJuez,
+    $cal1,
+    $cal2,
+    $cal3,
+    $cal4,
+    $cal5,
+    $cal6,
+    $fechaActual,
+    $fechaActual,
+    $observaciones,
+    $totalCalificacion,
+    $idParticipante,
+    $idensayo,
+    $idJuez
+  );
+
+  $ok = sqlsrv_query($conn, $querySave, $paramsSave);
+
+  if ($ok) {
+    echo json_encode(array('ok' => true, 'msg' => 'Calificacion guardada correctamente.'));
+  } else {
+    $msg = 'No se pudo guardar la calificacion.';
+    $errors = sqlsrv_errors();
+    if (!empty($errors)) {
+      $msg .= ' Detalle: ' . $errors[0]['message'];
+    }
+    echo json_encode(array('ok' => false, 'msg' => $msg));
+  }
+  exit;
 }
 
 $idensayo = intval($_POST['id'] ?? 0);
 $categoria = intval($_POST['categoria'] ?? 0);
 
-$query = "SELECT idensayo, idusuario, nombre, paterno, materno, sobrenombre, categoria, ensayo
+$query = "SELECT idensayo, idusuario, nombre, paterno, materno, sobrenombre, nombre_obra, categoria, ensayo
           FROM " . BD_PARTICIPANTES . " WHERE idensayo = ?";
 $res = sqlsrv_query($conn, $query, array($idensayo));
 $row = $res ? sqlsrv_fetch_array($res) : null;
 
 if (!$row) {
-    echo '<div class="card"><div class="card-body">No se encontro la persona participante.</div></div>';
-    exit;
+  echo '<div class="card"><div class="card-body">No se encontro la persona participante.</div></div>';
+  exit;
 }
 
 $idParticipante = intval($row['idusuario']);
 $nombreCompleto = trim(($row['nombre'] ?? '') . ' ' . ($row['paterno'] ?? '') . ' ' . ($row['materno'] ?? ''));
+$obra = htmlspecialchars($row['nombre_obra'] ?? '-', ENT_QUOTES, 'UTF-8');
 $categoriaFinal = intval($row['categoria'] ?? $categoria);
 $ensayo = $row['ensayo'] ?? '';
 
-$queryCalif = "SELECT TOP 1 * FROM calificaciones WHERE idusuario = ? AND nombre_juez = ? ORDER BY idcalifica DESC";
-$resCalif = sqlsrv_query($conn, $queryCalif, array($idParticipante, $nombreJuez));
+$queryCalif = "SELECT TOP 1 * FROM calificaciones WHERE idjuez = ? AND idensayo = ? ORDER BY idcalifica DESC";
+$resCalif = sqlsrv_query($conn, $queryCalif, array($idJuez, $idensayo));
 $rowCalif = $resCalif ? sqlsrv_fetch_array($resCalif) : null;
 
 $cal1 = floatval($rowCalif['califica1'] ?? 0);
@@ -131,7 +139,8 @@ $cal6 = floatval($rowCalif['califica6'] ?? 0);
 $total = isset($rowCalif['total']) ? floatval($rowCalif['total']) : round(($cal1 + $cal2 + $cal3 + $cal4 + $cal5 + $cal6), 1);
 $observaciones = htmlspecialchars($rowCalif['observaciones_gral'] ?? '', ENT_QUOTES, 'UTF-8');
 
-function opcionesCalificacion($minimo, $maximo, $valorActual) {
+function opcionesCalificacion($minimo, $maximo, $valorActual)
+{
   $html = '';
   for ($valor = $minimo; $valor <= $maximo + 0.0001; $valor += 0.1) {
     $valorRedondeado = round($valor, 1);
@@ -142,6 +151,7 @@ function opcionesCalificacion($minimo, $maximo, $valorActual) {
   return $html;
 }
 ?>
+
 <div class="vd-card">
   <div class="vd-header">
     <i class="fas fa-star" style="margin-right:8px;opacity:.85;"></i>Calificación del ensayo
@@ -152,85 +162,116 @@ function opcionesCalificacion($minimo, $maximo, $valorActual) {
 
     <div class="vd-section" style="margin-bottom:14px;">
       <div class="vd-field-row" style="align-items:center;">
-        <div class="vd-field-col--obs" style="min-width:280px;">
+        <!-- <div class="vd-field-col--obs" style="min-width:280px;">
           <label class="vd-label">Persona participante</label>
-          <input type="text" class="vd-input" value="<?php echo htmlspecialchars($nombreCompleto, ENT_QUOTES, 'UTF-8'); ?>" readonly>
-        </div>
+          <input type="text" class="vd-input" value="<?php echo htmlspecialchars($nombreCompleto, ENT_QUOTES, 'UTF-8'); ?>" readonly disabled>
+        </div> -->
         <div class="vd-field-col--obs" style="min-width:200px;">
-          <label class="vd-label">Seudónimo</label>
-          <input type="text" class="vd-input" value="<?php echo htmlspecialchars($row['sobrenombre'] ?? '-', ENT_QUOTES, 'UTF-8'); ?>" readonly>
+          <label class="vd-criterio">Titulo del ensayo</label>
+          <input type="text" class="vd-input" value="<?php echo $obra; ?>" readonly disabled>
         </div>
         <div class="vd-field-col--file">
+          <!--
           <?php if (!empty($ensayo)) { ?>
             <a href="<?php echo 'uploads/' . htmlspecialchars($ensayo, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" class="btn-view-file"><i class="fas fa-file-pdf"></i> Ver ensayo</a>
           <?php } ?>
+          -->
         </div>
       </div>
     </div>
 
     <div class="vd-section">
-      <div class="vd-section__label">Formato</div>
+      <div class="vd-criterio">Formato</div>
       <div class="vd-field-row">
-        <div class="vd-field-col--obs"><input type="text" class="vd-input" value="Hoja tamaño carta. Letra Arial de 12 puntos. Interlineado sencillo (1.0). Márgenes de 2.5 centímetros. Párrafos justificados. Citas y referencias en formato APA (7a edición)." readonly></div>
+        <div class="vd-field-col--obs">
+          <!-- <input type="text" class="vd-input" value="Hoja tamaño carta · Letra Arial de 12 puntos · Interlineado sencillo (1.0) · Márgenes (superior, inferior, derecho e izquierdo) de 2.5 centímetros · Párrafos justificados · Páginas numeradas · Citas y referencias en formato APA (7ª edición)" readonly disabled> -->
+          <span class="vd-detalle">· Hoja tamaño carta <br>· Letra Arial de 12 puntos <br> · Interlineado sencillo (1.0) <br>· Márgenes (superior, inferior, derecho e izquierdo) de 2.5 centímetros <br>· Párrafos justificados <br>· Páginas numeradas <br>· Citas y referencias en formato APA (7ª edición)</span>
+        </div>
         <div class="vd-field-col--status"><label class="vd-label">Calificación</label><select class="vd-select cal-juez" id="califica1" onchange="fnCalcularTotalCalificacionJuez()"><?php echo opcionesCalificacion(0.0, 0.5, $cal1); ?></select></div>
       </div>
     </div>
 
+    <br>
+
     <div class="vd-section">
-      <div class="vd-section__label">Claridad y coherencia</div>
+      <div class="vd-criterio">Claridad y coherencia</div>
       <div class="vd-field-row">
-        <div class="vd-field-col--obs"><input type="text" class="vd-input" value="Tesis clara, bien definida y fácil de identificar. Organización lógica y transiciones fluidas entre párrafos." readonly></div>
+        <div class="vd-field-col--obs">
+          <!-- <input type="text" class="vd-input" value="Tesis clara: está bien definida y es fácil de identificar. · Organización lógica: las ideas se presentan de manera coherente, con transiciones fluidas entre párrafos." readonly disabled>-->
+          <span class="vd-detalle">· Tesis clara: está bien definida y es fácil de identificar. <br>· Organización lógica: las ideas se presentan de manera coherente, con transiciones fluidas entre párrafos.</span>
+        </div>
         <div class="vd-field-col--status"><label class="vd-label">Calificación</label><select class="vd-select cal-juez" id="califica2" onchange="fnCalcularTotalCalificacionJuez()"><?php echo opcionesCalificacion(0.0, 2.0, $cal2); ?></select></div>
       </div>
     </div>
 
+    <br>
+
     <div class="vd-section">
-      <div class="vd-section__label">Contenido y profundidad</div>
+      <div class="vd-criterio">Contenido y profundidad</div>
       <div class="vd-field-row">
-        <div class="vd-field-col--obs"><input type="text" class="vd-input" value="Relevancia del contenido respecto al tema. Análisis sólido, evidencias y ejemplos para respaldar argumentos." readonly></div>
+        <div class="vd-field-col--obs">
+          <!-- <input type="text" class="vd-input" value="Relevancia: el contenido es importante y está directamente relacionado con el tema del ensayo. · Análisis: el ensayo demuestra un análisis y comprensión sólida del tema.        · Evidencia y ejemplos: se utilizan evidencias y ejemplos concretos para apoyar los argumentos. · Desarrollo: contesta las preguntas planteadas en el inciso c de la base 5 de la convocatoria." readonly disabled> -->
+          <span class="vd-detalle">· Relevancia: el contenido es importante y está directamente relacionado con el tema del ensayo. <br>· Análisis: el ensayo demuestra un análisis y comprensión sólida del tema.
+            <br>· Evidencia y ejemplos: se utilizan evidencias y ejemplos concretos para apoyar los argumentos. <br>· Desarrollo: contesta por lo menos una de las preguntas planteadas en el inciso c de la base 5.</span>
+        </div>
         <div class="vd-field-col--status"><label class="vd-label">Calificación</label><select class="vd-select cal-juez" id="califica3" onchange="fnCalcularTotalCalificacionJuez()"><?php echo opcionesCalificacion(0.0, 2.0, $cal3); ?></select></div>
       </div>
     </div>
 
+    <br>
+
     <div class="vd-section">
-      <div class="vd-section__label">Originalidad y creatividad</div>
+      <div class="vd-criterio">Originalidad y creatividad</div>
       <div class="vd-field-row">
-        <div class="vd-field-col--obs"><input type="text" class="vd-input" value="Perspectiva original y aportación de nuevas ideas o enfoques con argumentación innovadora." readonly></div>
+        <div class="vd-field-col--obs">
+          <!-- <input type="text" class="vd-input" value="Originalidad: el ensayo presenta una perspectiva original y aporta nuevas ideas o enfoques. · Creatividad: la persona autora demuestra capacidad para expresar sus ideas con un estilo propio y argumentación innovadora" readonly disabled> -->
+          <span class="vd-detalle">· Originalidad: el ensayo presenta una perspectiva original y aporta nuevas ideas o enfoques. <br>· Creatividad: la persona autora demuestra capacidad para expresar sus ideas con un estilo propio y argumentación innovadora.</span>
+        </div>
         <div class="vd-field-col--status"><label class="vd-label">Calificación</label><select class="vd-select cal-juez" id="califica4" onchange="fnCalcularTotalCalificacionJuez()"><?php echo opcionesCalificacion(0.0, 2.0, $cal4); ?></select></div>
       </div>
     </div>
 
+    <br>
+
     <div class="vd-section">
-      <div class="vd-section__label">Estilo, redacción, gramática y ortografía</div>
+      <div class="vd-criterio">Estilo, redacción, gramática y ortografía</div>
       <div class="vd-field-row">
-        <div class="vd-field-col--obs"><input type="text" class="vd-input" value="Lenguaje claro y adecuado para todo público, sin errores gramaticales u ortográficos." readonly></div>
+        <div class="vd-field-col--obs">
+          <!-- <input type="text" class="vd-input" value="Claridad: el lenguaje es preciso y adecuado para todo el público. · Fluidez: el texto es fácil de leer. · Corrección gramatical: el ensayo no contiene errores gramaticales. · Ortografía: no hay errores ortográficos y la puntuación es correcta" readonly disabled> -->
+          <span class="vd-detalle">· Claridad: el lenguaje es preciso y entendible. <br>· Fluidez: el texto es fácil de leer. <br>· Gramática: el ensayo no contiene errores gramaticales. <br>· Ortografía: no hay errores ortográficos y la puntuación es correcta.</span>
+        </div>
         <div class="vd-field-col--status"><label class="vd-label">Calificación</label><select class="vd-select cal-juez" id="califica5" onchange="fnCalcularTotalCalificacionJuez()"><?php echo opcionesCalificacion(0.0, 2.0, $cal5); ?></select></div>
       </div>
     </div>
 
+    <br>
+
     <div class="vd-section">
-      <div class="vd-section__label">Conclusión</div>
+      <div class="vd-criterio">Conclusión</div>
       <div class="vd-field-row">
-        <div class="vd-field-col--obs"><input type="text" class="vd-input" value="La conclusión resume los puntos clave y refuerza la tesis del ensayo." readonly></div>
+        <div class="vd-field-col--obs">
+          <!-- <input type="text" class="vd-input" value="Conclusión efectiva: la conclusión resume los puntos clave del ensayo y refuerza la tesis." readonly disabled> -->
+          <span class="vd-detalle">· Conclusión efectiva: la conclusión resume los puntos clave del ensayo y refuerza la tesis.</span>
+        </div>
         <div class="vd-field-col--status"><label class="vd-label">Calificación</label><select class="vd-select cal-juez" id="califica6" onchange="fnCalcularTotalCalificacionJuez()"><?php echo opcionesCalificacion(0.0, 1.5, $cal6); ?></select></div>
       </div>
     </div>
 
     <div class="vd-section" style="margin-bottom:16px;">
       <div class="vd-field-row" style="justify-content:flex-end;align-items:center;">
-        <label class="vd-label" style="margin:0 8px 0 0;">Calificación total</label>
+        <label class="vd-criterio" style="margin:0 8px 0 0;">Calificación total</label>
         <input type="text" class="vd-input" id="total_calificacion" value="<?php echo number_format($total, 1); ?>" readonly style="max-width:120px;text-align:center;font-weight:700;">
       </div>
     </div>
 
-    <div class="vd-section">
+    <!-- <div class="vd-section">
       <div class="vd-section__label">Observaciones generales</div>
       <textarea class="vd-textarea" id="observaciones_gral_cal" maxlength="500" placeholder="Escribe observaciones generales de la calificacion..." style="min-height:80px;"><?php echo $observaciones; ?></textarea>
-    </div>
+    </div> -->
 
     <div class="vd-actions">
       <div id="div_errors_cal"></div>
-      <button type="button" class="btn-vd-save" id="btn_guardar_cal" onclick="fnGuardarCalificacionJuez(this)"> 
+      <button type="button" class="btn-vd-save" id="btn_guardar_cal" onclick="fnGuardarCalificacionJuez(this)">
         <i class="fas fa-save"></i> Guardar calificación
       </button>
     </div>

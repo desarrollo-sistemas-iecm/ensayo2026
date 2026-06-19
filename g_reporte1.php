@@ -29,11 +29,13 @@ $sql = "SELECT
 	A.idjuez_asignado,
 	A.alcaldia,
 	A.te_enteraste,
-	concat(B.nombre, ' ', B.paterno, ' ', B.materno) AS usr_validador
+	concat(C.nombre, ' ', C.paterno, ' ', C.materno) AS usr_validador
 FROM
 	participantes as A
 INNER JOIN usuarios as B ON
 	A.idusuario = B.idusuario
+LEFT JOIN usuarios as C ON
+	A.status_requisitos = C.idusuario
 WHERE
 	folio IS NOT NULL
 ORDER BY

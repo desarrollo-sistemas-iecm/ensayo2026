@@ -133,8 +133,8 @@ include 'cat_alcaldia.php';
         </label>
         <div class="col-sm-8">
           <input type="text" class="form-control" name="titulo" id="titulo"
-            value="<?php echo $titulo; ?>" maxlength="300"
-            placeholder="Escribe el título de tu ensayo"
+            value="<?php echo $titulo; ?>" maxlength="100"
+            placeholder="Escribe el título de tu ensayo (No mayor a 100 caracteres)"
             <?php echo $style_disabled2; ?>>
         </div>
       </div>
@@ -144,7 +144,7 @@ include 'cat_alcaldia.php';
         </label>
         <div class="col-sm-8">
           <input type="text" class="form-control" name="sobrenombre" id="sobrenombre"
-            value="<?php echo $sobrenombre; ?>" maxlength="30"
+            value="<?php echo $sobrenombre; ?>" maxlength="50"
             placeholder="Nombre inventado"
             <?php echo $style_disabled2; ?>>
         </div>

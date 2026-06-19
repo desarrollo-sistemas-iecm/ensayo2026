@@ -74,183 +74,171 @@ if (isset($_SESSION['idusuario'])) {
       font-size: 2rem;
       color: #2E86AB;
       text-align: center;
-      margin-bottom: 36px;
+      margin-bottom: 10px;
       letter-spacing: .03em;
     }
 
+    /* Tarjeta de bienvenida */
+    .welcome-card {
+      background: #fff;
+      border-radius: 24px;
+      box-shadow: 0 8px 32px rgba(46,134,171,.13);
+      max-width: 720px;
+      margin: 32px auto 36px;
+      padding: 48px 52px 40px;
+      text-align: center;
+      border-top: 5px solid #2E86AB;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .welcome-card::before {
+      content: '';
+      position: absolute;
+      top: -60px; right: -60px;
+      width: 180px; height: 180px;
+      border-radius: 50%;
+      background: rgba(74,159,213,.07);
+    }
+
+    .welcome-card::after {
+      content: '';
+      position: absolute;
+      bottom: -40px; left: -40px;
+      width: 120px; height: 120px;
+      border-radius: 50%;
+      background: rgba(46,134,171,.05);
+    }
+
+    .welcome-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(46,134,171,.1);
+      color: #2E86AB;
+      border-radius: 30px;
+      padding: 6px 18px;
+      font-size: .82rem;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      margin-bottom: 22px;
+    }
+
+    .welcome-text {
+      font-size: 1.05rem;
+      color: #374151;
+      line-height: 1.75;
+      margin-bottom: 0;
+    }
+
+    .welcome-text p {
+      margin: 0 0 8px;
+    }
+
+    .welcome-text p:last-child {
+      margin-bottom: 0;
+      color: #2E86AB;
+      font-weight: 600;
+    }
+
+    .divider {
+      width: 60px;
+      height: 3px;
+      background: linear-gradient(90deg, #2E86AB, #4A9FD5);
+      border-radius: 10px;
+      margin: 20px auto;
+    }
+
     /* Botón Validación */
+    .btn-validacion-wrap {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
     .btn-validacion {
-      display: flex;
+      display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 10px;
+      gap: 12px;
       background: linear-gradient(135deg, #2E86AB, #4A9FD5);
       color: #fff;
       border: none;
       border-radius: 30px;
-      padding: 13px 40px;
-      font-size: 1rem;
+      padding: 16px 52px;
+      font-size: 1.08rem;
       font-weight: 700;
-      letter-spacing: .04em;
+      letter-spacing: .06em;
       text-decoration: none;
-      box-shadow: 0 4px 18px rgba(74, 159, 213, .35);
+      box-shadow: 0 6px 24px rgba(74,159,213,.4);
       transition: transform .18s, box-shadow .18s;
-      margin: 0 auto 40px;
-      width: fit-content;
     }
 
     .btn-validacion:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 26px rgba(74, 159, 213, .45);
+      transform: translateY(-3px);
+      box-shadow: 0 12px 32px rgba(74,159,213,.5);
       color: #fff;
       text-decoration: none;
     }
 
     .btn-validacion i {
-      font-size: 1.2rem;
-    }
-
-    /* Cards de reporte */
-    .report-card {
-      background: rgba(255, 255, 255, .72);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, .6);
-      border-radius: 20px;
-      box-shadow: 0 6px 24px rgba(46, 134, 171, .13);
-      padding: 52px 36px;
-      text-align: center;
-      text-decoration: none;
-      color: #374151;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 20px;
-      transition: transform .2s, box-shadow .2s;
-      cursor: pointer;
-      height: 100%;
-    }
-
-    .report-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 16px 40px rgba(46, 134, 171, .22);
-      text-decoration: none;
-      color: #2E86AB;
-    }
-
-    .report-card .excel-icon {
-      width: 86px;
-      height: 86px;
-      border-radius: 20px;
-      background: linear-gradient(135deg, #16a34a, #15803d);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 6px 20px rgba(21, 128, 61, .38);
-    }
-
-    .report-card .excel-icon i {
-      font-size: 2.8rem;
-      color: #fff;
-    }
-
-    .report-card .card-label {
-      font-family: 'Funnel Sans', sans-serif;
-      font-weight: 700;
       font-size: 1.25rem;
-      color: #2E86AB;
-    }
-
-    .report-card .card-sub {
-      font-size: .92rem;
-      color: #6b7280;
-      line-height: 1.5;
     }
 
     @media (max-width: 768px) {
-      .page-title {
-        font-size: 1.5rem;
-      }
-
-      .btn-validacion {
-        font-size: .9rem;
-        padding: 11px 30px;
-      }
-
-      .report-card {
-        padding: 40px 24px;
-      }
-
-      .report-card .excel-icon {
-        width: 70px;
-        height: 70px;
-      }
-
-      .report-card .excel-icon i {
-        font-size: 2.2rem;
-      }
-
-      .report-card .card-label {
-        font-size: 1.1rem;
-      }
+      .page-title { font-size: 1.45rem; }
+      .welcome-card { padding: 36px 24px 32px; margin: 20px 16px; }
+      .welcome-text { font-size: .97rem; }
+      .btn-validacion { font-size: .95rem; padding: 14px 36px; }
     }
   </style>
 </head>
 
 <body>
-  <div class="page-wrapper">
+<div class="page-wrapper">
 
-    <?php include('header.php'); ?>
+  <?php include('header.php'); ?>
 
-    <div class="page-content">
-      <div class="container" id="main_container">
+  <div class="page-content">
+    <div class="container" id="main_container">
 
-        <h1 class="page-title">
-          <i class="fas fa-user-shield" style="margin-right:10px;color:#4A9FD5;"></i>
-          <?php echo ucfirst($concurso); ?> &mdash; Perfil Jueces
-        </h1>
-        </br>
+      <h1 class="page-title">
+        <i class="fas fa-user-shield" style="margin-right:10px;color:#4A9FD5;"></i>
+        <?php echo ucfirst($concurso); ?> &mdash; Perfil Jurado
+      </h1>
 
-        <div class="text-center">
-          <p>Estimada/o persona integrante del jurado del Concurso Juvenil de Ensayo,</p>
-          <p>El Instituto Electoral de la Ciudad de México agradece de su participacion como jurado en el Concurso Juvenil de Ensayo 2026 "Conversando con los clásicos".</p>
-          <p>Este módulo tiene como objetivo calificar los ensayos mediante los criteios de evalaucion publicacion en la convocatoria.</p>
-          <p> Seleccina el boton Validación</p>
-        </div>
-    
-        <!-- Botón Validación -->
-        <div class="text-center">
-          <a href="g_validacion_juez.php" class="btn-validacion">
-            <i class="fas fa-check-circle"></i> Validación
-          </a>
+      <!-- Tarjeta de bienvenida -->
+      <div class="welcome-card">
+        <div class="welcome-badge">
+          <i class="fas fa-star"></i> Jurado
         </div>
 
-        <!-- Cards de reportes -->
-       <!-- <div class="row justify-content-center" style="max-width:900px;margin:0 auto;">
-
-          <div class="col-md-5 mb-4">
-            <a href="g_reporte3.php" class="report-card">
-              <div class="excel-icon"><i class="fas fa-file-excel"></i></div>
-              <div class="card-label">Reporte de calificaciones</div>
-              <div class="card-sub">Descarga el listado de calificaciones </div>
-            </a>
-          </div>
-
-          <div class="col-md-5 mb-4">
-            <a href="g_reporte2.php" class="report-card">
-              <div class="excel-icon"><i class="fas fa-file-excel"></i></div>
-              <div class="card-label">Reporte de registrados</div>
-              <div class="card-sub">Descarga el listado completo de registros</div>
-            </a>
-          </div>
-
+        <div class="welcome-text">
+          <p>Estimada persona integrante del jurado del Concurso Juvenil de Ensayo 2026 <strong>"Conversando con los clásicos"</strong>,</p>
+          <p>el Instituto Electoral de la Ciudad de México le agradece su participación.</p>
+          <strong>Este módulo tiene como objetivo calificar los ensayos con base en los criterios de evaluación publicados en la convocatoria.</strong>
         </div>
 
-      </div> -->
-    </div><!-- /page-content -->
+        <div class="divider"></div>
 
-    
-  </div><!-- /page-wrapper -->
+        <p class="welcome-text">
+          <i class="fas fa-hand-point-down" style="margin-right:6px;"></i>
+          Seleccione el botón para comenzar
+        </p>
+      </div>
+
+      <!-- Botón Validación -->
+      <div class="btn-validacion-wrap">
+        <a href="g_validacion_juez.php" class="btn-validacion">
+          <i class="fas fa-check-circle"></i> Ir a Validación
+        </a>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+<!-- /page-wrapper -->
   <?php include('footer.php'); ?>
 </body>
 

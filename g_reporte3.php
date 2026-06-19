@@ -11,21 +11,56 @@ error_reporting(0);
 
 session_start();
 $idusuario = $_SESSION['idusuario'] ?? 0;
-$perfil = intval($_SESSION['perfil'] ?? 0);
-$usuarioSesion = $_SESSION['usr'] ?? '';
+$perfil    = intval($_SESSION['perfil'] ?? 0);
 
-$soloJuez = ($perfil === 3);
+// Query principal: un registro por participante con datos de participantes y promedio global
+$sql = "SELECT
+    P.idensayo,
+    P.idusuario AS idusuario_participante,
+    LTRIM(RTRIM(CONCAT(P.nombre, ' ', P.paterno, ' ', P.materno))) AS nombre_completo,
+    P.folio,
+    P.sobrenombre,
+    P.categoria,
+    P.titulo,
+    P.curp,
+    P.clave_elector,
+    P.nombre_obra,
+    V1.prom_global,
+    V1.fecha_alta,
+    V1.fecha_modifica
+FROM " . BD_PARTICIPANTES . " AS P
+LEFT JOIN dbo.vw_calificaciones_ensayos AS V1 ON V1.idensayo = P.idensayo
+WHERE V1.idensayo IS NOT NULL
+ORDER BY V1.fecha_modifica DESC, P.idensayo ASC";
 
-$sql = "SELECT C.idcalifica, C.nombre_completo, C.categoria, C.nombre_juez, C.califica1, C.califica2, C.califica3, C.califica4, C.califica5, C.califica6,
-         C.fecha_alta, C.fecha_modifica, C.observaciones_gral, C.total, C.idusuario,
-         P.folio, P.sobrenombre, P.titulo, P.curp, P.clave_elector, P.nombre_obra
-        FROM calificaciones AS C
-        LEFT JOIN " . BD_PARTICIPANTES . " AS P ON P.idusuario = C.idusuario
-        " . ($soloJuez ? "WHERE C.nombre_juez = ?" : "") . "
-        ORDER BY C.fecha_modifica DESC, C.fecha_alta DESC, C.idcalifica DESC";
+$res = sqlsrv_query($conn, $sql, array());
 
-$params = $soloJuez ? array($usuarioSesion) : array();
-$res = sqlsrv_query($conn, $sql, $params);
+// Query de detalle por juez para cada ensayo
+$sqlJueces = "SELECT
+    C.idensayo,
+    C.nombre_juez,
+    C.califica1,
+    C.califica2,
+    C.califica3,
+    C.califica4,
+    C.califica5,
+    C.califica6,
+    ROUND(C.califica1+C.califica2+C.califica3+C.califica4+C.califica5+C.califica6, 1) AS total,
+    /*C.observaciones_gral,*/
+    C.fecha_alta,
+    ROW_NUMBER() OVER (PARTITION BY C.idensayo ORDER BY C.idcalifica ASC) AS rn
+FROM calificaciones AS C
+WHERE C.idensayo IS NOT NULL";
+
+$resJueces = sqlsrv_query($conn, $sqlJueces, array());
+
+// Agrupar calificaciones por idensayo
+$juecesData = array();
+while ($resJueces && ($rowJ = sqlsrv_fetch_array($resJueces, SQLSRV_FETCH_ASSOC))) {
+    $ide = $rowJ['idensayo'];
+    $rn  = $rowJ['rn'];
+    $juecesData[$ide][$rn] = $rowJ;
+}
 
 $style_th      = 'background:#2E86AB;color:#FFFFFF;font-weight:bold;font-size:11px;padding:6px 10px;border:1px solid #1d5a75;white-space:nowrap;';
 $style_td_even = 'font-size:11px;padding:5px 10px;border:1px solid #d1d5db;background:#e6f4f9;';
@@ -40,84 +75,106 @@ function fmtFechaExcel($fecha) {
     return htmlspecialchars((string)$fecha, ENT_QUOTES, 'UTF-8');
 }
 
+function celda($val, $style) {
+    return '<td style="' . $style . '">' . htmlspecialchars((string)($val ?? ''), ENT_QUOTES, 'UTF-8') . '</td>';
+}
+
+function celdaNum($val, $style, $dec = 1) {
+    return '<td style="' . $style . '">' . number_format((float)($val ?? 0), $dec) . '</td>';
+}
+
+// Total de columnas: 4 fijas + (10 por juez * 7 jueces) + 1 calif final = 75
+$totalCols = 75;
+
 echo '<table border="0" cellspacing="0" cellpadding="0" style="border-collapse:collapse;font-family:Calibri,Arial,sans-serif;width:100%;">';
+
 echo '<tr>
-        <td colspan="19" style="padding:10px 18px;background:#ffffff;border-bottom:1px solid #e5e7eb;vertical-align:middle;text-align:center;">
+        <td colspan="' . $totalCols . '" style="padding:10px 18px;background:#ffffff;border-bottom:1px solid #e5e7eb;vertical-align:middle;text-align:center;">
           <div style="font-size:14px;font-weight:bold;color:#0f2027;letter-spacing:.03em;">
             Instituto Electoral de la Ciudad de México
           </div>
         </td>
       </tr>';
-echo '<tr><td colspan="19" style="height:4px;background:#ffffff;"></td></tr>';
+echo '<tr><td colspan="' . $totalCols . '" style="height:4px;background:#ffffff;"></td></tr>';
 echo '<tr>
-        <td colspan="19" style="padding:4px 18px;background:#ffffff;text-align:center;font-size:13px;font-weight:bold;color:#2E86AB;">
+        <td colspan="' . $totalCols . '" style="padding:4px 18px;background:#ffffff;text-align:center;font-size:13px;font-weight:bold;color:#2E86AB;">
           Reporte de calificaciones del Concurso Juvenil de Ensayo 2026
-        </td> 
+        </td>
       </tr>';
 echo '<tr>
-        <td colspan="19" style="padding:4px 18px 10px;background:#ffffff;border-bottom:3px solid #0f2027;text-align:center;font-size:11px;color:#6b7280;letter-spacing:.04em;">
+        <td colspan="' . $totalCols . '" style="padding:4px 18px 10px;background:#ffffff;border-bottom:3px solid #0f2027;text-align:center;font-size:11px;color:#6b7280;letter-spacing:.04em;">
           FECHA Y HORA &nbsp;' . date('d/m/Y H:i:s') . '
         </td>
       </tr>';
-echo '<tr><td colspan="14" style="height:6px;"></td></tr>';
+echo '<tr><td colspan="' . $totalCols . '" style="height:6px;"></td></tr>';
 
-echo '<tr>
-        <th style="' . $style_th . '">Folio</th>
-        <th style="' . $style_th . '">Participante</th>
-        <th style="' . $style_th . '">Categoría</th>
-        <th style="' . $style_th . '">Juez</th>
-        <th style="' . $style_th . '">Fecha de calificación</th>
-        <th style="' . $style_th . '">Formato</th>
-        <th style="' . $style_th . '">Claridad</th>
-        <th style="' . $style_th . '">Contenido</th>
-        <th style="' . $style_th . '">Originalidad</th>
-        <th style="' . $style_th . '">Estilo</th>
-        <th style="' . $style_th . '">Conclusión</th>
-        <th style="' . $style_th . '">Total</th>
-        <th style="' . $style_th . '">Observaciones</th>
-      </tr>';
+// Encabezados
+$headers  = '<tr>';
+$headers .= '<th style="' . $style_th . '">Folio</th>';
+$headers .= '<th style="' . $style_th . '">Participante</th>';
+$headers .= '<th style="' . $style_th . '">Obra</th>';
+$headers .= '<th style="' . $style_th . '">Categoría</th>';
 
-$i = 0;
+for ($j = 1; $j <= 7; $j++) {
+    $headers .= '<th style="' . $style_th . '">Nombre Jurado ' . $j . '</th>';
+    $headers .= '<th style="' . $style_th . '">Fecha Calif. J' . $j . '</th>';
+    $headers .= '<th style="' . $style_th . '">Formato J' . $j . '</th>';
+    $headers .= '<th style="' . $style_th . '">Claridad J' . $j . '</th>';
+    $headers .= '<th style="' . $style_th . '">Contenido J' . $j . '</th>';
+    $headers .= '<th style="' . $style_th . '">Originalidad J' . $j . '</th>';
+    $headers .= '<th style="' . $style_th . '">Estilo J' . $j . '</th>';
+    $headers .= '<th style="' . $style_th . '">Conclusión J' . $j . '</th>';
+    $headers .= '<th style="' . $style_th . '">Total J' . $j . '</th>';
+    // $headers .= '<th style="' . $style_th . '">Observaciones J' . $j . '</th>';
+}
+
+$headers .= '<th style="' . $style_th . 'background:#0f5c2e;">Calif. Final</th>';
+$headers .= '</tr>';
+echo $headers;
+
+$i    = 0;
 $rows = '';
 
-while ($res && ($row = sqlsrv_fetch_array($res))) {
+while ($res && ($row = sqlsrv_fetch_array($res, SQLSRV_FETCH_ASSOC))) {
     $i++;
-    $td = ($i % 2 === 0) ? $style_td_even : $style_td_odd;
-    $folioStyle = ($i % 2 === 0) ? $style_folio . 'background:#e6f4f9;' : $style_folio . 'background:#FFFFFF;';
+    $td         = ($i % 2 === 0) ? $style_td_even : $style_td_odd;
+    $folioStyle = ($i % 2 === 0)
+        ? $style_folio . 'background:#e6f4f9;'
+        : $style_folio . 'background:#FFFFFF;';
 
-    $folio = htmlspecialchars($row['folio'] ?? '-', ENT_QUOTES, 'UTF-8');
+    $ide        = $row['idensayo'];
+    $folio      = htmlspecialchars($row['folio']           ?? '-', ENT_QUOTES, 'UTF-8');
     $participante = htmlspecialchars($row['nombre_completo'] ?? '', ENT_QUOTES, 'UTF-8');
-    $categoria = htmlspecialchars($row['categoria'] ?? '', ENT_QUOTES, 'UTF-8');
-    $juez = htmlspecialchars($row['nombre_juez'] ?? '', ENT_QUOTES, 'UTF-8');
-    $fechaAlta = fmtFechaExcel($row['fecha_modifica'] ?? '');
-    $c1 = htmlspecialchars((string)($row['califica1'] ?? ''), ENT_QUOTES, 'UTF-8');
-    $c2 = htmlspecialchars((string)($row['califica2'] ?? ''), ENT_QUOTES, 'UTF-8');
-    $c3 = htmlspecialchars((string)($row['califica3'] ?? ''), ENT_QUOTES, 'UTF-8');
-    $c4 = htmlspecialchars((string)($row['califica4'] ?? ''), ENT_QUOTES, 'UTF-8');
-    $c5 = htmlspecialchars((string)($row['califica5'] ?? ''), ENT_QUOTES, 'UTF-8');
-    $c6 = htmlspecialchars((string)($row['califica6'] ?? ''), ENT_QUOTES, 'UTF-8');
-    $total = htmlspecialchars((string)($row['total'] ?? ''), ENT_QUOTES, 'UTF-8');
-    $obs = htmlspecialchars($row['observaciones_gral'] ?? '', ENT_QUOTES, 'UTF-8');
+    $obra       = htmlspecialchars($row['nombre_obra']     ?? '-', ENT_QUOTES, 'UTF-8');
+    $categoria  = htmlspecialchars((string)($row['categoria'] ?? ''), ENT_QUOTES, 'UTF-8');
+    $promGlobal = number_format((float)($row['prom_global'] ?? 0), 2);
 
-    $rows .= '<tr>'
-        . '<td style="' . $folioStyle . '">' . $folio . '</td>'
-        . '<td style="' . $td . '">' . $participante . '</td>'
-        . '<td style="' . $td . '">' . $categoria . '</td>'
-        . '<td style="' . $td . '">' . $juez . '</td>'
-        . '<td style="' . $td . '">' . $fechaAlta . '</td>'
-        . '<td style="' . $td . '">' . $c1 . '</td>'
-        . '<td style="' . $td . '">' . $c2 . '</td>'
-        . '<td style="' . $td . '">' . $c3 . '</td>'
-        . '<td style="' . $td . '">' . $c4 . '</td>'
-        . '<td style="' . $td . '">' . $c5 . '</td>'
-        . '<td style="' . $td . '">' . $c6 . '</td>'
-        . '<td style="' . $td . '">' . $total . '</td>'
-        . '<td style="' . $td . '">' . $obs . '</td>'
-        . '</tr>';
+    $rows .= '<tr>';
+    $rows .= '<td style="' . $folioStyle . '">' . $folio . '</td>';
+    $rows .= celda($participante, $td);
+    $rows .= celda($obra, $td);
+    $rows .= celda($categoria, $td);
+
+    for ($j = 1; $j <= 7; $j++) {
+        $juez = $juecesData[$ide][$j] ?? null;
+        $rows .= celda($juez['nombre_juez']      ?? '-',  $td);
+        $rows .= celda(fmtFechaExcel($juez['fecha_alta'] ?? ''), $td);
+        $rows .= celdaNum($juez['califica1']     ?? 0,    $td);
+        $rows .= celdaNum($juez['califica2']     ?? 0,    $td);
+        $rows .= celdaNum($juez['califica3']     ?? 0,    $td);
+        $rows .= celdaNum($juez['califica4']     ?? 0,    $td);
+        $rows .= celdaNum($juez['califica5']     ?? 0,    $td);
+        $rows .= celdaNum($juez['califica6']     ?? 0,    $td);
+        $rows .= celdaNum($juez['total']         ?? 0,    $td);
+        // $rows .= celda($juez['observaciones_gral'] ?? '-', $td);
+    }
+
+    $rows .= '<td style="' . $td . 'font-weight:700;text-align:center;color:#0f5c2e;">' . $promGlobal . '</td>';
+    $rows .= '</tr>';
 }
 
 if ($i === 0) {
-    echo '<tr><td colspan="14" style="padding:18px;text-align:center;background:#fff;color:#6b7280;">No hay calificaciones registradas.</td></tr>';
+    echo '<tr><td colspan="' . $totalCols . '" style="padding:18px;text-align:center;background:#fff;color:#6b7280;">No hay calificaciones registradas.</td></tr>';
 } else {
     echo $rows;
 }

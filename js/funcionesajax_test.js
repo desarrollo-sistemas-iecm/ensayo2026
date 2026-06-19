@@ -286,7 +286,7 @@ function crearusuario(){
         }
         
                
-    var datos="action=insert"+"&nombre="+nombre+"&paterno="+paterno+"&materno="+materno+"&curp="+curp+"&genero="+genero+"&fecha_nacimiento="+fecha_nacimiento+"&user="+user+"&pass1="+pass1+"&pass2="+pass2+"&area="+area+"&concurso="+area+"&correo="+correo+"&tmptxt="+tmptxt;
+    var datos="action=registrar"+"&nombre="+nombre+"&paterno="+paterno+"&materno="+materno+"&curp="+curp+"&genero="+genero+"&fecha_nacimiento="+fecha_nacimiento+"&user="+user+"&pass1="+pass1+"&pass2="+pass2+"&area="+area+"&concurso="+area+"&correo="+correo+"&tmptxt="+tmptxt;
        
        
 	var xmlhttp = new XMLHttpRequest();
@@ -651,7 +651,7 @@ if(manifestacion1==undefined||manifestacion2==undefined||manifestacion3==undefin
             return false;
         }
                
-    var datos="action=insert"+"&nombre="+nombre+"&paterno="+paterno+"&materno="+materno+"&curp="+curp+"&sobrenombre="+sobrenombre+"&genero="+genero+"&correo="+correo;
+    var datos="op=guardar"+"&nombre="+nombre+"&paterno="+paterno+"&materno="+materno+"&curp="+curp+"&sobrenombre="+sobrenombre+"&genero="+genero+"&correo="+correo;
     datos+="&fecha_nacimiento="+fecha_nacimiento+"&idusuario="+idusuario+"&area="+area+"&edad="+edad;
     datos+="&titulo="+titulo+"&nombre_obra="+nombre_obra+"&categoria="+categoria+"&clave_elector="+clave_elector+"&paterno_tutor="+paterno_tutor+"&materno_tutor="+materno_tutor+"&nombre_tutor="+nombre_tutor;
     datos+="&tel1="+tel1+"&tel2="+tel2+"&alcaldia="+alcaldia+"&entidad="+entidad+"&domicilio="+domicilio;
@@ -1210,7 +1210,7 @@ function guardarparticipantedistrito(){
 
        
                
-    var datos="action=insert"+"&nombre="+nombre+"&paterno="+paterno+"&materno="+materno+"&sobrenombre="+sobrenombre+"&genero="+genero+"&correo="+correo;
+    var datos="op=guardar"+"&nombre="+nombre+"&paterno="+paterno+"&materno="+materno+"&sobrenombre="+sobrenombre+"&genero="+genero+"&correo="+correo;
     datos+="&fecha_nacimiento="+fecha_nacimiento+"&idusuario="+idusuario+"&area="+area;
     datos+="&titulo="+titulo+"&categoria="+categoria+"&resido_cdmx="+resido_cdmx+"&soyoriundo="+soyoriundo+"&soyoriginario="+soyoriginario;
     datos+="&tel1="+tel1+"&tel2="+tel2+"&alcaldia="+alcaldia+"&entidad="+entidad+"&domicilio="+domicilio;
@@ -1666,6 +1666,35 @@ function fnBusquedaFolio(){
 
 }
 
+
+function fnBusquedaFolioJ(){
+
+  //alert ("entro funcion folio");
+  
+  var val=document.getElementById('select_folio').value;
+
+  var textloader='<div class="row"><div class="loader"></div></div>';
+  document.getElementById('menu_').innerHTML = textloader; 
+
+  var xmlhttp = new XMLHttpRequest();
+    xmlhttp.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+                    //document.getElementById('div_errors').innerHTML = this.responseText;
+                    document.getElementById('menu_').innerHTML = this.responseText;
+                    //$('#select_colonia').append = this.responseText;
+
+        }
+    };
+
+
+        var parametros="accion=folio&val="+val;
+        xmlhttp.open("POST", "validacionlistado_juez.php", true);
+        xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+
+        xmlhttp.send(parametros);
+
+}
+
 /////////// funcion de busqueda para el nombre 
 function fnBusquedaNombre(){
 
@@ -2006,7 +2035,7 @@ function fnGuardarCalificacionJuez(btn){
   var cal4 = document.getElementById('califica4').value;
   var cal5 = document.getElementById('califica5').value;
   var cal6 = document.getElementById('califica6').value;
-  var observaciones = document.getElementById('observaciones_gral_cal').value;
+  // var observaciones = document.getElementById('observaciones_gral_cal').value;
 
   var total = (parseFloat(cal1 || 0)
     + parseFloat(cal2 || 0)
@@ -2017,10 +2046,10 @@ function fnGuardarCalificacionJuez(btn){
 
   Swal.fire({
     icon: 'warning',
-    title: 'Confirma la calificacion',
-    html: 'La calificacion total es <strong>' + total + '</strong>.<br>Es correcta?',
+    title: 'Confirmar calificación',
+    html: 'La calificación total/final es: <strong>' + total + '</strong>.<br>¿Es correcta la calificación?',
     showCancelButton: true,
-    confirmButtonText: 'Si es correcta',
+    confirmButtonText: 'Sí es correcta',
     cancelButtonText: 'No es correcta',
     confirmButtonColor: '#4A9FD5',
     cancelButtonColor: '#bb0808'
@@ -2044,7 +2073,7 @@ function fnGuardarCalificacionJuez(btn){
       + "&califica4=" + encodeURIComponent(cal4)
       + "&califica5=" + encodeURIComponent(cal5)
       + "&califica6=" + encodeURIComponent(cal6)
-      + "&observaciones_gral=" + encodeURIComponent(observaciones);
+      // + "&observaciones_gral=" + encodeURIComponent(observaciones);
 
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.onreadystatechange = function() {
@@ -2058,8 +2087,8 @@ function fnGuardarCalificacionJuez(btn){
           if (data && data.ok === true) {
             Swal.fire({
               icon: 'success',
-              title: 'Calificacion guardada',
-              text: 'La calificacion del ensayo se guardo correctamente.',
+              title: 'Calificación guardada',
+              text: 'La calificación se guardó correctamente',
               confirmButtonColor: '#4A9FD5'
             }).then(function(){
               // Reemplazar el botón por badge verde y deshabilitar controles de calificación
@@ -2078,7 +2107,7 @@ function fnGuardarCalificacionJuez(btn){
                 }
 
                 // deshabilitar selects y textarea
-                var ids = ['califica1','califica2','califica3','califica4','califica5','califica6','observaciones_gral_cal'];
+                var ids = ['califica1','califica2','califica3','califica4','califica5','califica6'/*'observaciones_gral_cal'*/];
                 ids.forEach(function(id){
                   var el = document.getElementById(id);
                   if (el) el.disabled = true;

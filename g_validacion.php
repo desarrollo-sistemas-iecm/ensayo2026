@@ -259,8 +259,12 @@ $concurso = 'ensayo';
       font-weight: 700;
       white-space: nowrap;
     }
-    .badge-val--ok   { background: #d1fae5; color: #065f46; }
-    .badge-val--none { background: #f3f4f6; color: #6b7280; }
+    .badge-val--ok   { background: #aaffd3; color: #171818; }
+    .badge-val--none-sin { background: #ffaaaa; color: #6b7280; }
+    .badge-val--none { background: #f1eca0; color: #0f0f0f; }
+    .badge-val--ok-calif   { background: #09b617 !important; color: #070707 !important; }
+    .badge-val--none-calif { background: #cf3f07 !important; color: #ffffff !important; }
+
     .btn-val-action {
       display: inline-flex;
       align-items: center;

@@ -259,14 +259,15 @@ $concurso = 'ensayo';
       font-weight: 700;
       white-space: nowrap;
     }
-    .badge-val--ok   { background: #d1fae5; color: #065f46; }
-    .badge-val--none { background: #fef3c7; color: #92400e; }
+    .badge-val--ok   { background: #bdf8c2 !important; color: #000000 !important; }
+    .badge-val--none { background: #f8ad7e !important; color: #000000 !important; }
+    .badge-val--none-wait { background: #f8ec7e !important; color: #181818 !important; }
     .btn-val-action {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      background: linear-gradient(135deg, #2E86AB, #4A9FD5);
-      color: #fff;
+      background: linear-gradient(135deg, #14a12b, #5aca26);
+      color: #ffffff;
       border: none;
       border-radius: 20px;
       padding: 5px 14px;
@@ -315,14 +316,20 @@ $concurso = 'ensayo';
     .vd-body { padding:28px 24px; }
     .vd-section { margin-bottom:26px; }
     .vd-section__label {
-      font-size:.75rem; font-weight:700; text-transform:uppercase;
+      font-size:.65rem; font-weight:700; text-transform:uppercase;
       letter-spacing:.08em; color:#9ca3af; margin-bottom:12px;
+    }
+    .vd-criterio {
+      font-size:.95rem; font-weight:700; color:#000000; margin-bottom:12px;
+    }
+    .vd-detalle {
+      font-size:.88rem; color:#374151; line-height:1.4;
     }
     .vd-field-row { display:flex; align-items:flex-end; gap:16px; flex-wrap:wrap; }
     .vd-field-col--file { flex:0 0 auto; }
     .vd-field-col--status { flex:0 0 145px; }
     .vd-field-col--obs { flex:1; min-width:200px; }
-    .vd-label { font-size:.78rem; font-weight:700; color:#6b7280; margin-bottom:5px; display:block; }
+    .vd-label { font-size:.88rem; font-weight:700; color:#6b7280; margin-bottom:5px; display:block; }
     .btn-view-file {
       display:inline-flex; align-items:center; gap:8px;
       background:#eff6ff; color:#2563eb; border:1.5px solid #93c5fd;
@@ -332,26 +339,26 @@ $concurso = 'ensayo';
     .btn-view-file:hover { background:#dbeafe; color:#1e40af; text-decoration:none; }
     .vd-nofile { color:#ef4444; font-size:.88rem; font-weight:600; }
     .vd-select {
-      width:100%; border:1.5px solid #d1d5db; border-radius:8px;
+      width:100%; border:1.5px solid #1ab415; border-radius:8px;
       padding:9px 12px; font-size:.88rem; background:#fff;
       cursor:pointer; transition:border-color .2s;
     }
-    .vd-select:focus { border-color:#4A9FD5; outline:none; box-shadow:0 0 0 3px rgba(74,159,213,.12); }
+    .vd-select:focus { border-color:#1ab415; outline:none; box-shadow:0 0 0 3px rgba(26, 199, 3, 0.12); }
     .vd-input {
-      width:100%; border:1.5px solid #d1d5db; border-radius:8px;
+      width:100%; border:1.9px solid #d1d5db; border-radius:8px;
       padding:9px 12px; font-size:.88rem; transition:border-color .2s;
     }
-    .vd-input:focus { border-color:#4A9FD5; outline:none; box-shadow:0 0 0 3px rgba(74,159,213,.12); }
+    .vd-input:focus { border-color:#1ab415; outline:none; box-shadow:0 0 0 3px rgba(26, 199, 3, 0.12); }
     .vd-checks { display:flex; gap:28px; flex-wrap:wrap; }
     .vd-check { display:flex; align-items:center; gap:8px; font-size:.88rem; color:#6b7280; cursor:not-allowed; }
-    .vd-check input[type=checkbox] { width:16px; height:16px; accent-color:#4A9FD5; cursor:not-allowed; }
+    .vd-check input[type=checkbox] { width:16px; height:16px; accent-color:#1ab415; cursor:not-allowed; }
     .vd-textarea {
       width:100%; border:1.5px solid #d1d5db; border-radius:8px;
       padding:10px 12px; font-size:.88rem; min-height:88px; resize:vertical;
       transition:border-color .2s; font-family:'Funnel Sans',sans-serif;
     }
     .vd-textarea:focus { border-color:#4A9FD5; outline:none; box-shadow:0 0 0 3px rgba(74,159,213,.12); }
-    .vd-actions { display:flex; flex-direction:column; align-items:flex-start; gap:10px; margin-top:4px; }
+    .vd-actions { display:flex; flex-direction:column; align-items:center; gap:10px; margin-top:4px; }
     .btn-vd-save {
       background:linear-gradient(135deg,#2E86AB,#4A9FD5); color:#fff;
       border:none; border-radius:8px; padding:11px 28px; font-size:.95rem;
@@ -380,7 +387,7 @@ $concurso = 'ensayo';
 
       <!-- Hero / título -->
       <div class="val-hero">
-        <h1><i class="fas fa-check-double" style="margin-right:10px;opacity:.85;"></i><?php echo ucfirst($concurso); ?> &mdash; Calificador</h1>
+        <h1><i class="fas fa-check-double" style="margin-right:10px;opacity:.85;"></i><?php echo ucfirst($concurso); ?> &mdash; Jurado</h1>
         <a href="mainjueces.php" class="btn-regresar"><i class="fas fa-arrow-left" style="margin-right:6px;"></i>Regresar</a>
       </div>
 
@@ -413,7 +420,7 @@ $concurso = 'ensayo';
         </div>
 
         <!-- Por folio -->
-      <!--  <div class="row align-items-center mb-3">
+       <div class="row align-items-center mb-3">
           <div class="col-sm-3">
             <label class="radio-opt">
             <input type="radio" name="radio_busqueda" value="2" onchange="fnRadioBusqueda();">
@@ -423,13 +430,13 @@ $concurso = 'ensayo';
           <div class="col-sm-9">
             <div class="search-row">
               <input type="text" class="form-control flex-grow-1" id="select_folio" name="select_folio"
-                     placeholder="Número de folio" onchange="fnBusquedaFolio()" disabled>
-              <button class="btn-buscar" id="btn_folio" onclick="fnBusquedaFolio()" disabled>
+                     placeholder="Número de folio" onchange="fnBusquedaFolioJ()" disabled>
+              <button class="btn-buscar" id="btn_folio" onclick="fnBusquedaFolioJ()" disabled>
                 <i class="fas fa-search" style="margin-right:5px;"></i>Buscar
               </button>
             </div>
           </div>
-        </div>-->
+        </div>
 
         <!-- Todos -->
         <div class="row align-items-center">
