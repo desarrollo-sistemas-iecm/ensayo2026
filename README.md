@@ -3,6 +3,8 @@
 
 Este repositorio alberga la plataforma web oficial para la gestión del **Concurso Juvenil de Ensayo 2026**, diseñado para el registro de participantes, carga de ensayos, validación administrativa de requisitos, evaluación por parte de jueces y notificación automática por correo electrónico.
 
+El nuevo diseño visual, la reestructuración general del proyecto y el módulo completo de evaluación de jueces fueron creados y desarrollados desde cero por **Bruno Corona**.
+
 El sistema ha sido modernizado para ofrecer compatibilidad total con **PHP 8.x**, reforzando la seguridad mediante la prevención de inyección SQL y optimizando el flujo de folios.
 
 ---
@@ -74,6 +76,12 @@ Se implementó una solución en [g_validaciondocumentos.php](file:///c:/xampp/ht
 
 ### 🤖 3. Captcha Nativo compatible con PHP 8
 Se eliminó la dependencia externa obsoleta de `jpgraph_antispam` (incompatible con PHP 8) por una implementación nativa basada en la extensión `GD` de PHP. Ésta genera dinámicamente un captcha aleatorio seguro con ruido visual directamente en el servidor.
+
+### ⚖️ 4. Módulo de Evaluación por Jueces (Creado desde cero por Bruno Corona)
+Se diseñó e implementó un sistema completamente nuevo para la asignación y calificación de ensayos por parte del jurado:
+* **Asignación Eficiente:** Permite asociar jueces a participantes utilizando identificadores únicos para evitar colisiones o inconsistencias.
+* **Panel de Evaluación:** Los jueces cuentan con interfaces dedicadas para calificar las rúbricas y emitir dictámenes.
+* **Seguridad de Datos:** Integración total con sentencias preparadas y control de accesos de sesión específicos de jueces.
 
 ---
 
