@@ -15,7 +15,7 @@ $show_back_button = true; // Mostrar botón de volver en el header
 $fecha_inicio_registro = '2026-03-01 09:00:00';
 $fecha_fin_registro = '2026-05-06 08:58:00';
 
-$boton_habilitado = false; //FALSO CIERRE DE REGISTRO || TRUE ABIERTO REGISTRO
+$boton_habilitado = true; //FALSO CIERRE DE REGISTRO || TRUE ABIERTO REGISTRO
 
 if (date('Y-m-d H:i:s') >= $fecha_inicio_registro && date('Y-m-d H:i:s') <= $fecha_fin_registro) {
     $boton_habilitado = true; // Habilitar el botón

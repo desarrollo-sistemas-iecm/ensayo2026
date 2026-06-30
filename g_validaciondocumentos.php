@@ -1,5 +1,12 @@
 <?php
 session_start();
+if (!isset($_SESSION['idusuario']) || empty($_SESSION['idusuario'])) {
+    if (isset($_POST['action']) && $_POST['action'] == 'update') {
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode(['ok' => false, 'msg' => 'Sesión expirada. Por favor, vuelva a iniciar sesión.']);
+        exit;
+    }
+}
 $idusuario=$_SESSION['idusuario'];
 
 $id=$_POST['id'];
@@ -45,38 +52,51 @@ if($action=='update'){//////////////////código del update y el correo
 		}
 
 		if (empty($folio)) {
-			// Si no tiene folio, se genera uno nuevo
-			$query1="SELECT COUNT(idensayo) as numero FROM ".BD_PARTICIPANTES." where folio is not null AND categoria=".$categoria."";
+			sqlsrv_begin_transaction($conn);
 
-			$row = sqlsrv_query($conn,$query1);
-			if($res=sqlsrv_fetch_array($row))
-			{
-				$num=intval($res['numero'])+1;
-			}else{
+			try {
+				// WITH (UPDLOCK, HOLDLOCK) bloquea la lectura hasta que se haga
+				// COMMIT, evitando que otro proceso lea el mismo COUNT simultáneamente
+				$query1 = "SELECT COUNT(idensayo) as numero 
+				           FROM " . BD_PARTICIPANTES . " WITH (UPDLOCK, HOLDLOCK)
+				           WHERE folio IS NOT NULL 
+				           AND categoria = ?";
 
-          	//echo "1"	;
-				die( print_r( sqlsrv_errors(), true));
-			}
+				$row = sqlsrv_query($conn, $query1, array(intval($categoria)));
 
-			$folio="CE".$categoria."-".$num;
-			$checkfolio=true;
-
-			while($checkfolio){
-				$query2="SELECT count(idensayo) as existe FROM ".BD_PARTICIPANTES." where folio='".$folio."'";
-
-				$row = sqlsrv_query($conn,$query2);
-				while($res=sqlsrv_fetch_array($row))
-				{
-					$existe=intval($res["existe"]);
-					if($existe>=1){
-						$num++;
-						$folio="CE".$categoria."-".$num;
-						$checkfolio=true;
-					}else{
-						$checkfolio=false;
-					}
+				if ($res = sqlsrv_fetch_array($row)) {
+					$num = intval($res['numero']) + 1;
+				} else {
+					sqlsrv_rollback($conn);
+					echo json_encode(['ok' => null, 'msg' => 'Error al generar folio']);
+					exit;
 				}
+
+				// Verificar que el folio candidato no exista (dentro de la transacción)
+				$folio_candidato = "CE" . intval($categoria) . "-" . $num;
+				$query2 = "SELECT COUNT(idensayo) as existe 
+				           FROM " . BD_PARTICIPANTES . " 
+				           WHERE folio = ?";
+
+				$row2 = sqlsrv_query($conn, $query2, array($folio_candidato));
+				$res2 = sqlsrv_fetch_array($row2);
+
+				while ($res2 && intval($res2['existe']) >= 1) {
+					$num++;
+					$folio_candidato = "CE" . intval($categoria) . "-" . $num;
+					$row2 = sqlsrv_query($conn, $query2, array($folio_candidato));
+					$res2 = sqlsrv_fetch_array($row2);
+				}
+
+				$folio = $folio_candidato;
+
+			} catch (Exception $e) {
+				sqlsrv_rollback($conn);
+				echo json_encode(['ok' => null, 'msg' => 'Error interno al generar folio']);
+				exit;
 			}
+			// El COMMIT se hace después del UPDATE para que folio + registro
+			// queden en una sola transacción atómica
 		}
 
     if ($estatus_ensayo==1){
@@ -96,11 +116,19 @@ if($action=='update'){//////////////////código del update y el correo
 
 	$row = sqlsrv_query($conn, $query, $params);
     
-    if($row){
-	    $guardado=true;
-    }else{
-	    $guardado=false;
-    }
+	if ($row) {
+		// Solo si el folio fue recién generado en esta petición, hacer commit
+		if (isset($folio_candidato)) {
+			sqlsrv_commit($conn);
+		}
+		$guardado = true;
+	} else {
+		// Si el UPDATE falla, revertir también la reserva del folio
+		if (isset($folio_candidato)) {
+			sqlsrv_rollback($conn);
+		}
+		$guardado = false;
+	}
 
     if($guardado){
 	    $query= "SELECT B.correo, B.nombre, B.paterno, B.materno FROM ".BD_PARTICIPANTES." as A INNER JOIN ".BD_USUARIOS." as B ON A.idusuario= B.idusuario and idensayo='".$id."' and A.iddistrito=0";

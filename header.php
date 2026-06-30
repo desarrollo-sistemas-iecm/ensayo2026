@@ -4,7 +4,16 @@
  * Header fijo del sitio con gradiente y animación de scroll (GSAP ScrollTrigger).
  * Se incluye en todas las páginas del proyecto.
  */
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 ?>
+<!-- SweetAlert2 para control de sesión -->
+<?php if (!empty($_SESSION['idusuario']) && ($_SESSION['perfil'] == 2 || $_SESSION['perfil'] == 3)): ?>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<?php endif; ?>
+
 
 <!-- Tipografía Google Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -147,3 +156,141 @@
 		});
 	}
 </script>
+
+<?php if (!empty($_SESSION['idusuario']) && ($_SESSION['perfil'] == 3)): ?>
+<script>
+(function () {
+    'use strict';
+
+    // ─── Configuración ───────────────────────────────────────────────────────
+    var SESSION_MINUTES    = 30;       // Duración de la sesión en minutos
+    var CONFIRM_SECONDS    = 10;       // Segundos para confirmar antes de cerrar
+    var LOGOUT_URL         = 'logout.php';
+    var REFRESH_URL        = 'refresh_session.php';
+
+    var SESSION_MS         = SESSION_MINUTES * 60 * 1000;
+    var sessionTimer       = null;
+    var countdownTimer     = null;
+    var swalIsOpen         = false;
+
+    // ─── Redirigir al login y destruir sesión ────────────────────────────────
+    function forceLogout() {
+        if (countdownTimer) clearInterval(countdownTimer);
+        if (sessionTimer)   clearTimeout(sessionTimer);
+        window.location.href = LOGOUT_URL;
+    }
+
+    // ─── Renovar sesión vía AJAX ─────────────────────────────────────────────
+    function renewSession() {
+        // Mostrar loader de retroalimentación
+        Swal.fire({
+            title: 'Continuando con la sesión…',
+            html:
+                '<div style="display:flex;flex-direction:column;align-items:center;gap:12px;padding:8px 0;">' +
+                    '<div class="swal-loader-ring"></div>' +
+                    '<p style="margin:0;font-size:.95rem;color:#6b7280;">Un momento, por favor.</p>' +
+                '</div>',
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            showConfirmButton: false,
+            didOpen: function () {
+                // Inyectar estilos del spinner si aún no existen
+                if (!document.getElementById('swal-loader-style')) {
+                    var style = document.createElement('style');
+                    style.id = 'swal-loader-style';
+                    style.textContent =
+                        '.swal-loader-ring{' +
+                            'width:52px;height:52px;border-radius:50%;' +
+                            'border:5px solid #e5e7eb;' +
+                            'border-top-color:#2E86AB;' +
+                            'animation:swal-spin .8s linear infinite;' +
+                        '}' +
+                        '@keyframes swal-spin{to{transform:rotate(360deg)}}';
+                    document.head.appendChild(style);
+                }
+
+                // Llamar al endpoint AJAX mientras el loader está visible
+                fetch(REFRESH_URL, { method: 'POST', credentials: 'same-origin' })
+                    .then(function (r) { return r.json(); })
+                    .then(function (data) {
+                        // Esperar 2 segundos para que el loader sea visible
+                        setTimeout(function () {
+                            Swal.close();
+                            if (data.ok) {
+                                resetTimer();
+                            } else {
+                                forceLogout();
+                            }
+                        }, 2000);
+                    })
+                    .catch(function () {
+                        setTimeout(function () {
+                            Swal.close();
+                            forceLogout();
+                        }, 2000);
+                    });
+            }
+        });
+    }
+
+    // ─── Mostrar alerta de advertencia con cuenta regresiva ──────────────────
+    function showWarning() {
+        if (swalIsOpen) return;
+        swalIsOpen = true;
+
+        var secondsLeft = CONFIRM_SECONDS;
+
+        Swal.fire({
+            icon: 'warning',
+            title: '¿Sigues ahí?',
+            html:
+                '<p style="font-size:1rem;color:#374151;margin-bottom:8px;">' +
+                    'Tu sesión está a punto de cerrarse por inactividad.' +
+                '</p>' +
+                '<p id="swal-countdown" style="font-size:1.4rem;font-weight:700;color:#dc2626;">' +
+                    'Cerrando en <strong id="swal-sec">' + secondsLeft + '</strong> segundos…' +
+                '</p>',
+            confirmButtonText: 'Sigo aquí',
+            confirmButtonColor: '#2E86AB',
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            showCancelButton: false,
+            didOpen: function () {
+                // Countdown en pantalla
+                countdownTimer = setInterval(function () {
+                    secondsLeft--;
+                    var el = document.getElementById('swal-sec');
+                    if (el) el.textContent = secondsLeft;
+
+                    if (secondsLeft <= 0) {
+                        clearInterval(countdownTimer);
+                        Swal.close();
+                        swalIsOpen = false;
+                        forceLogout();
+                    }
+                }, 1000);
+            },
+            willClose: function () {
+                clearInterval(countdownTimer);
+            }
+        }).then(function (result) {
+            swalIsOpen = false;
+            if (result.isConfirmed) {
+                // El usuario confirmó → renovar sesión
+                renewSession();
+            }
+        });
+    }
+
+    // ─── Reiniciar el temporizador ───────────────────────────────────────────
+    function resetTimer() {
+        if (sessionTimer) clearTimeout(sessionTimer);
+        sessionTimer = setTimeout(showWarning, SESSION_MS);
+    }
+
+    // ─── Iniciar al cargar la página ─────────────────────────────────────────
+    resetTimer();
+
+})();
+</script>
+<?php endif; ?>
